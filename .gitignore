@@ -1,0 +1,8 @@
+*.DS_Store
+.DS_Store
+bin
+logs
+mdata/etc
+mdata/output/etc/smart
+mdata/output/etc/zone
+mdata/persistent
