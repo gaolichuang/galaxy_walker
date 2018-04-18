@@ -26,6 +26,8 @@ type ConfType struct {
 	FilePersistentPath *string
 
 	ConnectionMode *string
+
+	Crawler CrawlerType
 }
 
 var _conf = ConfType{
@@ -45,6 +47,7 @@ var _conf = ConfType{
 	ReloadConfInterval: flag.Int("reload_conf_interval", 60, "reload conf interval"),
 	FilePersistentPath: flag.String("persistent_file_path", "persistent", "persistent file path, relative by conf_path"),
 	ConnectionMode:     flag.String("conn_mode", "SRTT", "rr or srtt"),
+	Crawler: CrawlerConf,
 }
 
 var Conf *ConfType

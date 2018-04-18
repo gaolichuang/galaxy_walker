@@ -1,4 +1,4 @@
-package crawl
+package utils
 
 import (
         pb "galaxy_walker/src/proto"

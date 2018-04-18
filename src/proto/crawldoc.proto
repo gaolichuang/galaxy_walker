@@ -3,24 +3,24 @@ syntax = "proto3";
 package proto;
 
 enum ReturnType {
-    UNKNOWN                 = 0;
-//    NODNS                   = 1;
-    NOCONNECTION            = 2;
-//    FORBIDDENROBOTS         = 3;
-    TIMEOUT                 = 4;
-    BADTYPE                 = 5;
-    TOOBIG                  = 6;
-    BADHEADER               = 7;
-//    NETWORKERROR            = 8;
-    SITEQUEUEFULLFETCHER    = 9;
+    UNKNOWN = 0;
+    //    NODNS                   = 1;
+    NOCONNECTION = 2;
+    //    FORBIDDENROBOTS         = 3;
+    TIMEOUT = 4;
+    BADTYPE = 5;
+    TOOBIG = 6;
+    BADHEADER = 7;
+    //    NETWORKERROR            = 8;
+    SITEQUEUEFULLFETCHER = 9;
     // url format is not avaliable  crawl/base/utils.IsInvalidUrl()
-    INVALIDURL              = 10;
-    INVALIDREDIRECTURL      = 11;
-//    META_REDIRECT           = 12;
-//    JS_REDIRECT             = 13;
-//    IP_BLACKLISTED          = 14;
-//    BADCONTENT              = 15;
-//    URL_BLACKLISTED         = 16;
+    INVALIDURL = 10;
+    INVALIDREDIRECTURL = 11;
+    //    META_REDIRECT           = 12;
+    //    JS_REDIRECT             = 13;
+    //    IP_BLACKLISTED          = 14;
+    //    BADCONTENT              = 15;
+    //    URL_BLACKLISTED         = 16;
     SITEQUEUEFULLDISPATCHER = 17;
 
     STATUS100 = 100;
@@ -75,119 +75,135 @@ enum ReturnType {
 // tag for source. you can custom
 // like primary_tag and second_tag
 enum RequestType {
-    TESTING     = 0;
-    GENERAL     = 1;
+    TESTING = 0;
+    GENERAL = 1;
 }
 
 enum Priority {
-    NORMAL  =   0;
-    URGENT  =   1;
+    NORMAL = 0;
+    URGENT = 1;
 }
 
 // generate from page analysis
 enum DocType {
-    NORMALDOC      =   0;
-    WEB_MAIN    =   1;
-    WEB_HUB     =   2;
-    WEB_CONTENT =   3;
+    NORMALDOC = 0;
+    WEB_MAIN = 1;
+    WEB_HUB = 2;
+    WEB_CONTENT = 3;
 }
 
 message ConnectionInfo {
     string host = 1;
-    int32  port = 2;
+    int32 port = 2;
 }
 
 message OutLink {
-    string  url  = 1;
-    string  text = 2;
+    string url = 1;
+    string text = 2;
 }
 
 message FetchHint {
-    string host =   1;
-    string path =   2;
+    string host = 1;
+    string path = 2;
     // int32   ip  =   3;
     // int32   port    =   4;
     // string post_data = 5;
 }
 
 message CrawlRecord {
-    int64   request_time    = 1;
-    ConnectionInfo fetcher  = 2;
+    int64 request_time = 1;
+    ConnectionInfo fetcher = 2;
     // time the doc fetched
-    int64   fetch_time      = 3;
-    int64   fetch_use       = 4;
+    int64 fetch_time = 3;
+    int64 fetch_use = 4;
 }
 
 message CrawlParam {
-    Priority    pri         =   1;
-    int32       hostload    =   2;
-    int32   random_hostload =   3;
-    int32   fetcher_count   =   4;  // for multi fetcher, default should set 1, come from config file.
-    bool    drop_content    =   5;
-    bool    nofollow        =   6;
+    Priority pri = 1;
+    int32 hostload = 2;
+    int32 random_hostload = 3;
+    int32 fetcher_count = 4; // for multi fetcher, default should set 1, come from config file.
+    bool drop_content = 5;
+    bool nofollow = 6;
 
-    string  store_engine    =   7;
-    string  store_db        =   8;
-    string  store_table     =   9;
+    string store_engine = 7;
+    string store_db = 8;
+    string store_table = 9;
 
-    string  fake_host       =   10;  // filll from config file
-    FetchHint fetch_hint    =   11;
-    repeated ConnectionInfo receivers   = 12; // fill from config file
+    string fake_host = 10; // filll from config file
+    FetchHint fetch_hint = 11;
+    repeated ConnectionInfo receivers = 12; // fill from config file
 
     string referer = 20;
-    bool    custom_ua   =   21;
-    bool    use_proxy   =   22;
-    bool    follow_redirect =   23;
+    bool custom_ua = 21;
+    bool use_proxy = 22;
+    bool follow_redirect = 23;
 
-    RequestType rtype       =   101;
+    RequestType rtype = 101;
     string primary_tag = 102;
     repeated string secondary_tag = 103;
 }
 
-message CrawlHistory {
+// for follow redirect.
+message CrawlChain {
     // TODO.
-}
-
-message CrawlDoc {
-    uint32  docid = 1;
-    string  request_url = 2;
+    uint32 docid = 1;
+    string request_url = 2;
     // url use to crawl. it's generated base on request url
-    string  url = 3;
+    string url = 3;
 
     // fill at fetcher, http response information
     string redirect_url = 4;
-    ReturnType  code    =   5;
+    ReturnType code = 5;
     // record error.Errors.
-    string error_info   =   6;
-    string  content =   7;
-    int64   content_length = 8;
-    // compress at storage handler.
-    bool    content_compressed  = 9;
+    string error_info = 6;
+    string content = 7;
+    int64 content_length = 8;
     // response header.
-    string  header  =   10;
+    string header = 10;
+}
+
+message CrawlDoc {
+    uint32 docid = 1;
+    string request_url = 2;
+    // url use to crawl. it's generated base on request url
+    string url = 3;
+
+    // fill at fetcher, http response information
+    string redirect_url = 4;
+    ReturnType code = 5;
+    // record error.Errors.
+    string error_info = 6;
+    string content = 7;
+    int64 content_length = 8;
+    // compress at storage handler.
+    bool content_compressed = 9;
+    // response header.
+    string header = 10;
     string last_modify = 11;
     // content type of the page, eg text/html
     string content_type = 12;
 
-
-    repeated OutLink    indomain_outlinks = 30;
-    repeated OutLink    outdomain_outlinks = 31;
+    repeated OutLink indomain_outlinks = 30;
+    repeated OutLink outdomain_outlinks = 31;
     // content hash(128 bit)
     // int64 chash_0   =   32;
     // int64 chash_1   =   33;
     // original encoding which is deteched by the page content
-    string orig_encoding   = 34;
+    string orig_encoding = 34;
     // encoding after convert to utf8
     // the same with orig_encoding if convert fail
     // utf8 if convert success
-    string conv_encoding =   35;
+    string conv_encoding = 35;
     // language the page is detected to
     //int32 language = 36;
 
     string reservation = 40;
 
-    CrawlParam  crawl_param = 50;
+    CrawlParam crawl_param = 50;
     CrawlRecord crawl_record = 60;
+
+    repeated CrawlChain redirectChain = 70;
 }
 message CrawlDocs {
     repeated CrawlDoc docs = 1;
@@ -197,9 +213,9 @@ message CrawlRequest {
 }
 message CrawlResponse {
     bool ok = 1;
-    int64   ret = 2;
+    int64 ret = 2;
 }
 service CrawlService {
-    rpc Feed(CrawlDocs) returns (CrawlResponse) {}
-    rpc IsHealthy(CrawlRequest) returns (CrawlResponse) {}
+    rpc Feed (CrawlDocs) returns (CrawlResponse) {}
+    rpc IsHealthy (CrawlRequest) returns (CrawlResponse) {}
 }

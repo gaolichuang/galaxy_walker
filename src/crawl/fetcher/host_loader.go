@@ -2,11 +2,12 @@ package fetcher
 
 import (
 	"errors"
-        "galaxy_walker/internal/gcodebase/conf"
-        "galaxy_walker/internal/gcodebase/hash"
-        LOG "galaxy_walker/internal/gcodebase/log"
-        "galaxy_walker/internal/gcodebase/time_util"
-        "galaxy_walker/src/proto"
+	"galaxy_walker/internal/gcodebase/conf"
+	"galaxy_walker/internal/gcodebase/hash"
+	LOG "galaxy_walker/internal/gcodebase/log"
+	"galaxy_walker/internal/gcodebase/time_util"
+	"galaxy_walker/src/proto"
+	"galaxy_walker/src/utils"
 )
 
 var CONF = conf.Conf
@@ -80,7 +81,7 @@ func (hl *HostLoader) Him() int {
 	return hl.him
 }
 func (hl *HostLoader) Push(doc *proto.CrawlDoc) error {
-	host := base.GetHostName(doc)
+	host := utils.GetHostName(doc)
 	q, exist := hl.hostMap[host]
 	if exist {
 		if q.Full() {
@@ -112,7 +113,7 @@ func (hl *HostLoader) Travel(s map[string]int64, f func(*proto.CrawlDoc) bool) {
 		}
 		now := time_util.GetCurrentTimeStamp()
 		doc, _ := v.Top()
-		if now-s[base.GetHostName(doc)] > int64(int(doc.CrawlParam.Hostload)+hash.RandomIntn(1+int(doc.CrawlParam.RandomHostload))) {
+		if now-s[utils.GetHostName(doc)] > int64(int(doc.CrawlParam.Hostload)+hash.RandomIntn(1+int(doc.CrawlParam.RandomHostload))) {
 			if f(doc) {
 				v.Pop()
 			}

@@ -4,11 +4,12 @@ import (
 	LOG "galaxy_walker/internal/gcodebase/log"
 	"galaxy_walker/internal/gcodebase/time_util"
 	"galaxy_walker/src/proto"
+	"galaxy_walker/src/utils"
 )
 
 const (
-	CONNECTION_POOL_RECOVER_INTERVAL = 3600
-	CONNECTION_POOL_TIMEOUT          = 3600
+	kConnectionPoolRecoverInterval = 3600
+	kConnectionPoolTimeOut = 3600
 )
 
 type ConnectionPool struct {
@@ -38,12 +39,12 @@ func (c *ConnectionPool) BusyConnectionNum() int {
 }
 func (c *ConnectionPool) releaseRecordAndHold() {
 	now := time_util.GetCurrentTimeStamp()
-	if now-c.last_recover_timestamp < CONNECTION_POOL_RECOVER_INTERVAL {
+	if now-c.last_recover_timestamp < kConnectionPoolRecoverInterval {
 		return
 	}
 	release := make([]string, 0)
 	for k, v := range c.record {
-		if time_util.GetCurrentTimeStamp()-v > CONNECTION_POOL_TIMEOUT {
+		if time_util.GetCurrentTimeStamp()-v > kConnectionPoolTimeOut {
 			release = append(release, k)
 		}
 	}
@@ -57,7 +58,7 @@ func (c *ConnectionPool) releaseRecordAndHold() {
 // return false: connection all busy, can not fetch
 func (c *ConnectionPool) Fetch(doc *proto.CrawlDoc) bool {
 	// check hold or not
-	host := base.GetHostName(doc)
+	host := utils.GetHostName(doc)
 	if c.hold[host] == true {
 		return false
 	}
@@ -82,9 +83,9 @@ func (c *ConnectionPool) Fetch(doc *proto.CrawlDoc) bool {
 	go conn.FetchOne(doc, func(doc *proto.CrawlDoc, conn *Connection) {
 		c.free = append(c.free, conn)
 		delete(c.busy, conn)
-		c.record[base.GetHostName(doc)] = time_util.GetCurrentTimeStamp()
+		c.record[utils.GetHostName(doc)] = time_util.GetCurrentTimeStamp()
 		doc.CrawlRecord.FetchUse = time_util.GetCurrentTimeStamp() - doc.CrawlRecord.FetchTime
-		c.hold[base.GetHostName(doc)] = false
+		c.hold[utils.GetHostName(doc)] = false
 		c.output_chan <- doc
 	})
 	c.releaseRecordAndHold()
