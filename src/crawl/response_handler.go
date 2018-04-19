@@ -8,6 +8,7 @@ import (
         "galaxy_walker/internal/gcodebase/string_util"
         "galaxy_walker/internal/gcodebase/time_util"
         "galaxy_walker/internal/gcodebase/hash"
+        "galaxy_walker/src/crawl/scheduler"
 )
 
 const (

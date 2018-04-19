@@ -226,3 +226,11 @@ func RandomSeq(len int) []int {
         }(&sli)
         return sli
 }
+func ShuffleInt(len int) []byte {
+        sli := []byte{}
+        for i := 0; i < len; i++ {
+                sli = append(sli, byte(i))
+        }
+        Shuffle(&sli)
+        return sli
+}

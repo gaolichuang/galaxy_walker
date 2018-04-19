@@ -22,6 +22,10 @@ func Deserialize(s []byte, pb proto.Message) error {
 	}
 	return e
 }
+func CloneCrawlDoc(doc *CrawlDoc) *CrawlDoc {
+	nd := proto.Clone(doc)
+	return nd.(*CrawlDoc)
+}
 func FromProtoToString(pb proto.Message) string {
 	return proto.MarshalTextString(pb)
 }

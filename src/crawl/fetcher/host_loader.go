@@ -113,7 +113,7 @@ func (hl *HostLoader) Travel(s map[string]int64, f func(*proto.CrawlDoc) bool) {
 		}
 		now := time_util.GetCurrentTimeStamp()
 		doc, _ := v.Top()
-		if now-s[utils.GetHostName(doc)] > int64(int(doc.CrawlParam.Hostload)+hash.RandomIntn(1+int(doc.CrawlParam.RandomHostload))) {
+		if now-s[utils.GetHostName(doc)] > int64(int(doc.CrawlParam.Hostload)+hash.RandomIntn(int(doc.CrawlParam.RandomHostload))) {
 			if f(doc) {
 				v.Pop()
 			}

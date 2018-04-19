@@ -8,7 +8,7 @@ http://www.cnblogs.com/golove/p/3269099.html
 3.slim 获取有效部分 html parser
 4.regex提取有效部分
 */
-package main
+package test
 
 import (
         "galaxy_walker/internal/gcodebase/http_lib"

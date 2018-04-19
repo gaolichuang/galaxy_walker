@@ -7,6 +7,7 @@ import (
     LOG "galaxy_walker/internal/gcodebase/log"
     "net/url"
     "strconv"
+    "gcodebase/file"
 )
 
 /*
@@ -25,28 +26,26 @@ const (
 )
 
 type ProxyManager struct {
-    deads          []string // "host:port"
-    alives         []string
-    last_load_time int64
-    mode           SelectMode
-    index          int
+    deads  []string // "host:port"
+    alives []string
+    mode   SelectMode
+    index  int
+    file.ConfigLoader
 }
 
 func (p *ProxyManager) loadConf() {
     fname := *CONF.Crawler.ProxyConfFile
-    result, fresh := crawl_base.LoadConfigWithTwoField("ProxyConf", fname, ":", &p.last_load_time)
-    if fresh {
-        p.deads = nil
-        p.alives = nil
-        for k, v := range result {
-            port, err := strconv.Atoi(v)
-            if err != nil {
-                LOG.Errorf("Load Config Atoi Error, %s %s:%s", fname, k, v)
-                continue
-            }
-            p.alives = append(p.alives, fmt.Sprintf("%s:%d", k, port))
-            LOG.VLog(3).Debugf("Load fetch proxy %s : %d", k, port)
+    result := p.LoadConfigWithTwoField("ProxyConf", fname, ":")
+    p.deads = nil
+    p.alives = nil
+    for k, v := range result {
+        port, err := strconv.Atoi(v)
+        if err != nil {
+            LOG.Errorf("Load Config Atoi Error, %s %s:%s", fname, k, v)
+            continue
         }
+        p.alives = append(p.alives, fmt.Sprintf("%s:%d", k, port))
+        LOG.VLog(3).Debugf("Load fetch proxy %s : %d", k, port)
     }
 }
 func (p *ProxyManager) MarkDeadProxy(_url *url.URL) {
