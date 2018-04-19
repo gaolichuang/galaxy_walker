@@ -113,7 +113,7 @@ func (s *CrawlDocSender) Connect() bool {
 		} else {
 			opts = append(opts, grpc.WithInsecure())
 		}
-		opts = append(opts, grpc.WithTimeout(time.Second*time.Duration(*CONF.Crawler.ConnectionTimeout)))
+		opts = append(opts, grpc.WithTimeout(time.Second*time.Duration(*CONF.ConnectionTimeout)))
 		opts = append(opts, grpc.WithBlock()) // grpc should with block...
 		var serverAddr string
 		string_util.StringAppendF(&serverAddr, "%s:%d", s.host, s.port)

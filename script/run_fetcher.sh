@@ -65,8 +65,9 @@ HPORT=$(($PORT + 50))
 LOG_FILE=$LOG_PATH/`basename $BIN`.log
 mkdir -p  $LOG_PATH
 
+    #--crawl_handler_chain=FetchHandler;PrepareHandler;DocHandler;StorageHandler;ResponseHandler
 CMD="$BIN
-    --crawl_handler_chain=FetchHandler;PrepareHandler;DocHandler;StorageHandler;ResponseHandler
+    --crawl_handler_chain=DummyRequestProcessor;FetchHandler
     --crawl_input_processor=RequestProcessor
     --proxy_conf_file=etc/crawl/fetch_proxys.config
     --channel_buffer_size=10
@@ -86,7 +87,7 @@ checkOnce() {
   return $?
 }
 check() {
-  for (( c=1; c<=5; c++ ))
+  for (( c=1; c<=15; c++ ))
   do
     sleep 1
     checkOnce
@@ -97,10 +98,12 @@ check() {
   return 1
 }
 start() {
+  ulimit -n unlimited
   # clear log...
   rm $LOG_FILE
   # open gctrace.
   export GODEBUG=gctrace=1
+  export GOTRACEBACK=crash
   echo $CMD
   nohup $CMD >> $LOG_FILE 2>&1 &
   check

@@ -11,7 +11,7 @@ import (
 	"path"
 	"regexp"
 
-	"github.com/gorilla/context"
+	"galaxy_walker/internal/github.com/gorilla/context"
 )
 
 // NewRouter returns a new router instance.

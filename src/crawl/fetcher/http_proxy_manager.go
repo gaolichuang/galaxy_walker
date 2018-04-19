@@ -4,10 +4,10 @@ import (
     "errors"
     "fmt"
     "math/rand"
-    LOG "galaxy_walker/internal/gcodebase/log"
     "net/url"
     "strconv"
-    "gcodebase/file"
+    "galaxy_walker/internal/gcodebase/file"
+    LOG "galaxy_walker/internal/gcodebase/log"
 )
 
 /*

@@ -28,7 +28,6 @@ type CrawlerType struct {
 	DispatchLiveFeederRatio  *float64
 	DispatchFlushInterval    *int
 	HttpPort                 *int
-	ConnectionTimeout        *int
 	ConfigFileReloadInterval *int
 	// scheduler
 	UrlScheduleFile  *string
@@ -66,7 +65,6 @@ var CrawlerConf = CrawlerType{
 	DispatchLiveFeederRatio:  flag.Float64("live_feeder_ratio", 0, "dispatcher live feeder ratio"),
 	DispatchFlushInterval:    flag.Int("dispatch_flush_interval", 10, "dispatch flush interval"),
 	HttpPort:                 flag.Int("http_port", 9050, "http port"),
-	ConnectionTimeout:        flag.Int("connection_timeout", 2, "connection timeout"),
 	DefaultHostLoad:          flag.Int("default_hostload", 5, "default host load"),
 	ConfigFileReloadInterval: flag.Int("config_file_reload_interval", 1800, "config file reload interval"),
 	UrlScheduleFile:          flag.String("schedule_file", "", "each line is a url"),

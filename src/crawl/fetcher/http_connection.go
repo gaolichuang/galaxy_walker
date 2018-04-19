@@ -7,8 +7,6 @@ import (
     "fmt"
     "io"
     "io/ioutil"
-    LOG "galaxy_walker/internal/gcodebase/log"
-    pb "galaxy_walker/src/proto"
     "net"
     "net/http"
     "net/http/httputil"
@@ -16,6 +14,8 @@ import (
     "strings"
     "time"
     "galaxy_walker/src/utils"
+    LOG "galaxy_walker/internal/gcodebase/log"
+    pb "galaxy_walker/src/proto"
 )
 
 const (
