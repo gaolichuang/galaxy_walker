@@ -67,7 +67,7 @@ mkdir -p  $LOG_PATH
 
     #--crawl_handler_chain=FetchHandler;PrepareHandler;DocHandler;StorageHandler;ResponseHandler
 CMD="$BIN
-    --crawl_handler_chain=DummyRequestProcessor;FetchHandler
+    --crawl_handler_chain=DummyRequestProcessor;FetchHandler;PrepareHandler
     --crawl_input_processor=RequestProcessor
     --proxy_conf_file=etc/crawl/fetch_proxys.config
     --channel_buffer_size=10
@@ -79,7 +79,7 @@ CMD="$BIN
     --crawl_request_port=$PORT
     --conf_path_prefix=$MDATA
     --http_port=$HPORT
-    --v=4
+    --v=5
     --stdout=true"
 checkOnce() {
   pnum=`ps -ef |grep "$BIN"|grep -c $HPORT`

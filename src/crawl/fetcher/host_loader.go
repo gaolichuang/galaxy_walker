@@ -111,9 +111,9 @@ func (hl *HostLoader) Travel(s map[string]int64, f func(*proto.CrawlDoc) bool) {
 			release = append(release, k)
 			continue
 		}
-		now := time_util.GetCurrentTimeStamp()
 		doc, _ := v.Top()
-		if now-s[utils.GetHostName(doc)] > int64(int(doc.CrawlParam.Hostload)+hash.RandomIntn(int(doc.CrawlParam.RandomHostload))) {
+		if time_util.GetCurrentTimeStamp() - s[utils.GetHostName(doc)] >
+			int64(int(doc.CrawlParam.Hostload)+hash.RandomIntn(1+int(doc.CrawlParam.RandomHostload))) {
 			if f(doc) {
 				v.Pop()
 			}
@@ -122,7 +122,7 @@ func (hl *HostLoader) Travel(s map[string]int64, f func(*proto.CrawlDoc) bool) {
 	hl.him = lens
 	hl.uim = docs
 	// release or not
-	if float64(rel)/float64(lens) > *CONF.Crawler.HostLoaderReleaseRatio {
+	if lens > 0 && float64(rel)/float64(lens) > *CONF.Crawler.HostLoaderReleaseRatio {
 		for _, k := range release {
 			delete(hl.hostMap, k)
 		}

@@ -48,7 +48,7 @@ var CrawlerConf = CrawlerType{
 	CrawlInputHandler:        flag.String("crawl_input_processor", "RequestProcessor", "input processors,split by ;"),
 	HostLoaderQueueSize:      flag.Int("host_load_queue_size", 20, "queue size for each host"),
 	HostLoaderReleaseRatio:   flag.Float64("host_load_release_ratio", 0.6, "release ratio vacancy rate"),
-	FetchConnectionNum:       flag.Int("fetch_connection_number", 10, "url fetch connection number"),
+	FetchConnectionNum:       flag.Int("fetch_connection_number", 1000, "url fetch connection number"),
 	CrawlRequestPort:         flag.Int("crawl_request_port", 9010, "grpc port"),
 	CrawlRequestHealthyRatio: flag.Float64("crawl_request_healthy_ratio", 0.9, " healthy raito"),
 	CrawlersConfigFile:       flag.String("crawlers_config_file", "etc/crawl/crawlers.config", "fetcher config file, ip:port each line"),

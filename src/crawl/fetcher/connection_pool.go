@@ -5,11 +5,13 @@ import (
 	"galaxy_walker/internal/gcodebase/time_util"
 	"galaxy_walker/src/proto"
 	"galaxy_walker/src/utils"
+    "sync"
 )
 
 const (
 	kConnectionPoolRecoverInterval = 3600
 	kConnectionPoolTimeOut = 3600
+	kConnectionPoolNewDozenSize = 10
 )
 
 type ConnectionPool struct {
@@ -19,6 +21,7 @@ type ConnectionPool struct {
 	busy                   map[*Connection]bool // make it could delete
 	output_chan            chan<- *proto.CrawlDoc
 	last_recover_timestamp int64
+	sync.Mutex
 }
 
 func (c *ConnectionPool) SetOutChan(output_chan chan<- *proto.CrawlDoc) {
@@ -38,13 +41,12 @@ func (c *ConnectionPool) BusyConnectionNum() int {
 	return len(c.busy)
 }
 func (c *ConnectionPool) releaseRecordAndHold() {
-	now := time_util.GetCurrentTimeStamp()
-	if now-c.last_recover_timestamp < kConnectionPoolRecoverInterval {
+	if time_util.GetCurrentTimeStamp() - c.last_recover_timestamp < kConnectionPoolRecoverInterval {
 		return
 	}
 	release := make([]string, 0)
 	for k, v := range c.record {
-		if time_util.GetCurrentTimeStamp()-v > kConnectionPoolTimeOut {
+		if time_util.GetCurrentTimeStamp() - v > kConnectionPoolTimeOut {
 			release = append(release, k)
 		}
 	}
@@ -56,16 +58,19 @@ func (c *ConnectionPool) releaseRecordAndHold() {
 }
 
 // return false: connection all busy, can not fetch
+// single thread
 func (c *ConnectionPool) Fetch(doc *proto.CrawlDoc) bool {
+    c.Lock()
+    defer c.Unlock()
 	// check hold or not
 	host := utils.GetHostName(doc)
 	if c.hold[host] == true {
 		return false
 	}
 	if len(c.free) == 0 {
-		if len(c.free)+len(c.busy) < *CONF.Crawler.FetchConnectionNum {
+		if len(c.free) + len(c.busy) < *CONF.Crawler.FetchConnectionNum {
 			// new dozen conns
-			for i := 0; i < 10; i++ {
+			for i := 0; i < kConnectionPoolNewDozenSize; i++ {
 				conn := NewConnection()
 				c.free = append(c.free, conn)
 			}
@@ -78,13 +83,17 @@ func (c *ConnectionPool) Fetch(doc *proto.CrawlDoc) bool {
 	c.free = c.free[1:]
 	c.busy[conn] = true
 	c.hold[host] = true
+
 	// use goroutine to fetch.
+	t1 := time_util.GetTimeInMs()
 	doc.CrawlRecord.FetchTime = time_util.GetCurrentTimeStamp()
-	go conn.FetchOne(doc, func(doc *proto.CrawlDoc, conn *Connection) {
+	go conn.FetchOne(doc,func(doc *proto.CrawlDoc, conn *Connection) {
+	    c.Lock()
+	    defer c.Unlock()
 		c.free = append(c.free, conn)
 		delete(c.busy, conn)
 		c.record[utils.GetHostName(doc)] = time_util.GetCurrentTimeStamp()
-		doc.CrawlRecord.FetchUse = time_util.GetCurrentTimeStamp() - doc.CrawlRecord.FetchTime
+		doc.CrawlRecord.FetchUseInms = time_util.GetTimeInMs() - t1
 		c.hold[utils.GetHostName(doc)] = false
 		c.output_chan <- doc
 	})

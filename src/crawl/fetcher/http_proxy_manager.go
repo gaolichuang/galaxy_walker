@@ -34,14 +34,13 @@ type ProxyManager struct {
 }
 
 func (p *ProxyManager) loadConf() {
-    fname := *CONF.Crawler.ProxyConfFile
-    result := p.LoadConfigWithTwoField("ProxyConf", fname, ":")
+    result := p.LoadConfigWithTwoField("ProxyConf", *CONF.Crawler.ProxyConfFile, ":")
     p.deads = nil
     p.alives = nil
     for k, v := range result {
         port, err := strconv.Atoi(v)
         if err != nil {
-            LOG.Errorf("Load Config Atoi Error, %s %s:%s", fname, k, v)
+            LOG.Errorf("Load Config Atoi Error, %s %s:%s", *CONF.Crawler.ProxyConfFile, k, v)
             continue
         }
         p.alives = append(p.alives, fmt.Sprintf("%s:%d", k, port))

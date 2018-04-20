@@ -20,13 +20,9 @@ func (handler *PrepareHandler) Accept(crawlDoc *proto.CrawlDoc) bool {
 
 func (handler *PrepareHandler) Process(crawlDoc *proto.CrawlDoc) {
     LOG.VLog(4).Debugf("\n%s", utils.DumpCrawlDoc(crawlDoc))
-    // dump unicode content..
-    LOG.VLog(5).Debugf("Content:\n%U", crawlDoc.Content)
     crawlDoc.ContentLength = int64(len(crawlDoc.Content))
     // charset detect if not utf-8, decode it.
     translateEncoding(crawlDoc)
-    // TODO, language detect...
-
 }
 func translateEncoding(crawlDoc *proto.CrawlDoc) {
     e, n, _ := charset.DetermineEncoding([]byte(crawlDoc.Content), crawlDoc.ContentType)

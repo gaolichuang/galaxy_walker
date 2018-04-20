@@ -115,7 +115,7 @@ message CrawlRecord {
     ConnectionInfo fetcher = 2;
     // time the doc fetched
     int64 fetch_time = 3;
-    int64 fetch_use = 4;
+    int64 fetch_use_inms = 4;
 }
 
 message CrawlParam {

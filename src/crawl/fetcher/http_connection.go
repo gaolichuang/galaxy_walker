@@ -75,7 +75,7 @@ func (c *Connection) FetchOne(doc *pb.CrawlDoc, f func(*pb.CrawlDoc, *Connection
         WithSchema(doc.RequestUrl).
         WithRedirect(doc.CrawlParam.FollowRedirect).
         WithProxy(doc.CrawlParam.UseProxy).
-        NewClient()
+        GetClient()
     req := c.requestGenerator.
         WithCustomUA(doc.CrawlParam.CustomUa).
         WithReferer(doc.CrawlParam.Referer).
@@ -178,6 +178,10 @@ func NewConnection() *Connection {
 
 ////////////////HttpClientGenerator//////////////////////////////////////////////////////////
 type HttpClientGenerator struct {
+    clients map[string]*http.Client
+    httpdnsClient *http.Client
+
+
     httpProxy *ProxyManager
     redirect  bool
     https     bool // if use https, no proxy...
