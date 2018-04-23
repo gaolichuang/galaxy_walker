@@ -49,7 +49,7 @@ func (handler *DocHandler) extractLinkCallBack(i int, s *goquery.Selection) {
     text := string_util.Purify(s.Text(), "\n", "\t", " ")
     if strings.HasPrefix(href, "/") {
         requrl, _ := url.Parse(handler.doc.RequestUrl)
-        LOG.VLog(4).Debugf("InDomainLinkFill %s,text:%U", href, text)
+        LOG.VLog(6).Debugf("InDomainLinkFill %s,text:%U", href, text)
         handler.doc.IndomainOutlinks = append(handler.doc.IndomainOutlinks, &proto.OutLink{
             Url:  fmt.Sprintf("%s://%s%s", requrl.Scheme, requrl.Host, href),
             Text: text,
@@ -57,13 +57,13 @@ func (handler *DocHandler) extractLinkCallBack(i int, s *goquery.Selection) {
     } else {
         newdomain := utils.GetDomainFromHost(url_parser.GetHost(href))
         if utils.IsSameDomain(newdomain, handler.domain) {
-            LOG.VLog(4).Debugf("InDomainLink %s,text:%U", href, text)
+            LOG.VLog(6).Debugf("InDomainLink %s,text:%U", href, text)
             handler.doc.IndomainOutlinks = append(handler.doc.IndomainOutlinks, &proto.OutLink{
                 Url:  href,
                 Text: text,
             })
         } else {
-            LOG.VLog(4).Debugf("OutDomainLink %s,text:%U", href, text)
+            LOG.VLog(6).Debugf("OutDomainLink %s,text:%s", href, text)
             handler.doc.OutdomainOutlinks = append(handler.doc.OutdomainOutlinks, &proto.OutLink{
                 Url:  href,
                 Text: text,
@@ -78,11 +78,10 @@ func (handler *DocHandler) Process(crawlDoc *proto.CrawlDoc) {
     LOG.VLog(3).Debugf("[%s]Process One Doc %s ",
         reflect.Indirect(reflect.ValueOf(handler)).Type().Name(),
         crawlDoc.Url)
-    LOG.VLog(4).Debugf("DocHandler. DumpCrawlDoc\n%s", utils.DumpCrawlDoc(crawlDoc))
     handler.doc = crawlDoc
     handler.domain = utils.GetDomainFromHost(url_parser.GetHost(crawlDoc.RequestUrl))
-
     handler.htmlParser.Parse(handler.doc.Url, handler.doc.Content)
+    LOG.VLog(4).Debugf("DocHandler. DumpCrawlDoc\n%s", utils.DumpCrawlDoc(crawlDoc))
 }
 
 // use for create instance from a string

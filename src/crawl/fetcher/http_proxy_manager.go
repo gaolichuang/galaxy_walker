@@ -34,20 +34,23 @@ type ProxyManager struct {
 }
 
 func (p *ProxyManager) loadConf() {
-    result := p.LoadConfigWithTwoField("ProxyConf", *CONF.Crawler.ProxyConfFile, ":")
-    p.deads = nil
-    p.alives = nil
-    for k, v := range result {
-        port, err := strconv.Atoi(v)
-        if err != nil {
-            LOG.Errorf("Load Config Atoi Error, %s %s:%s", *CONF.Crawler.ProxyConfFile, k, v)
-            continue
+    if p.ShouldReloadConfigWithContentChange(*CONF.Crawler.ProxyConfFile) {
+        result := p.LoadConfigWithTwoField("ProxyConf", *CONF.Crawler.ProxyConfFile, ":")
+        p.deads = nil
+        p.alives = nil
+        for k, v := range result {
+            port, err := strconv.Atoi(v)
+            if err != nil {
+                LOG.Errorf("Load Config Atoi Error, %s %s:%s", *CONF.Crawler.ProxyConfFile, k, v)
+                continue
+            }
+            p.alives = append(p.alives, fmt.Sprintf("%s:%d", k, port))
+            LOG.VLog(3).Debugf("Load fetch proxy %s : %d", k, port)
         }
-        p.alives = append(p.alives, fmt.Sprintf("%s:%d", k, port))
-        LOG.VLog(3).Debugf("Load fetch proxy %s : %d", k, port)
     }
 }
 func (p *ProxyManager) MarkDeadProxy(_url *url.URL) {
+    if _url == nil {return}
     alive := []string{}
     deadurl := _url.Host
     for _, c := range p.alives {
@@ -91,6 +94,7 @@ func NewProxyManager(mode SelectMode) *ProxyManager {
         mode:  mode,
         index: 0,
     }
+    p.SetReloadInterval(int64(*CONF.Crawler.ReloadConfInterval)).SetConfigVersionFile(*CONF.Crawler.VersionFile)
     p.loadConf()
     return p
 }

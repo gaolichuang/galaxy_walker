@@ -67,7 +67,7 @@ mkdir -p  $LOG_PATH
 
     #--crawl_handler_chain=FetchHandler;PrepareHandler;DocHandler;StorageHandler;ResponseHandler
 CMD="$BIN
-    --crawl_handler_chain=DummyRequestProcessor;FetchHandler;PrepareHandler
+    --crawl_handler_chain=DummyRequestProcessor;FetchHandler;PrepareHandler;DocHandler
     --crawl_input_processor=RequestProcessor
     --proxy_conf_file=etc/crawl/fetch_proxys.config
     --channel_buffer_size=10

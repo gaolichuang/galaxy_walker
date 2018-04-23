@@ -5,6 +5,9 @@ import (
 )
 
 type CrawlerType struct {
+	VersionFile                          *string
+	ReloadConfInterval                   *int
+
 	ChannelBufSize           *int
 	CrawlHandlerChain        *string
 	CrawlInputHandler        *string
@@ -27,6 +30,7 @@ type CrawlerType struct {
 	DispatchAsDomainSlot     *int
 	DispatchLiveFeederRatio  *float64
 	DispatchFlushInterval    *int
+	RpcConnectionTimeOut *int
 	HttpPort                 *int
 	ConfigFileReloadInterval *int
 	// scheduler
@@ -43,6 +47,8 @@ type CrawlerType struct {
 }
 
 var CrawlerConf = CrawlerType{
+    VersionFile:        flag.String("version_file", "etc.version_file", "version file"),
+    ReloadConfInterval: flag.Int("reload_record_interval", 60, "reload domain <==> reload config interval"),
 	ChannelBufSize:           flag.Int("channel_buffer_size", 100, "channel buffer size"),
 	CrawlHandlerChain:        flag.String("crawl_handler_chain", "FetchHandler;PrepareHandler;DocHandler;StorageHandler", "handler chain, split by ;"),
 	CrawlInputHandler:        flag.String("crawl_input_processor", "RequestProcessor", "input processors,split by ;"),
@@ -64,6 +70,7 @@ var CrawlerConf = CrawlerType{
 	DispatchAsDomainSlot:     flag.Int("dispatch_as_domain_slots", 10, "dispatch as domain slot..."),
 	DispatchLiveFeederRatio:  flag.Float64("live_feeder_ratio", 0, "dispatcher live feeder ratio"),
 	DispatchFlushInterval:    flag.Int("dispatch_flush_interval", 10, "dispatch flush interval"),
+    RpcConnectionTimeOut:    flag.Int("rpc_conn_timeout", 3, "rpc connection timeout"),
 	HttpPort:                 flag.Int("http_port", 9050, "http port"),
 	DefaultHostLoad:          flag.Int("default_hostload", 5, "default host load"),
 	ConfigFileReloadInterval: flag.Int("config_file_reload_interval", 1800, "config file reload interval"),
