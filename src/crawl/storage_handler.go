@@ -40,7 +40,7 @@ func (handler *StorageHandler) saveDocs() {
         */
         handler.docs = make([]*pb.CrawlDoc, 0)
         handler.last_db_time = time_util.GetCurrentTimeStamp()
-        LOG.VLog(3).Debugf("Flush %d using time %d ms.", num, time_util.GetTimeInMs()-t1)
+        LOG.VLog(3).Debugf("Flush %d using time %d ms.", num, time_util.GetTimeInMs() - t1)
     }
 }
 func (handler *StorageHandler) DBThread() {

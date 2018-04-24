@@ -76,7 +76,12 @@ enum ReturnType {
 // like primary_tag and second_tag
 enum RequestType {
     TESTING = 0;
-    GENERAL = 1;
+    NORMALDOC = 1;
+    WEB_MAIN = 2;
+    WEB_HUB = 3;
+    WEB_CONTENT = 4;
+    WEB_SUBCONTENT = 5;
+    WEB_DETAIL = 6;
 }
 
 enum Priority {
@@ -84,13 +89,6 @@ enum Priority {
     URGENT = 1;
 }
 
-// generate from page analysis
-enum DocType {
-    NORMALDOC = 0;
-    WEB_MAIN = 1;
-    WEB_HUB = 2;
-    WEB_CONTENT = 3;
-}
 
 message ConnectionInfo {
     string host = 1;
@@ -116,6 +114,8 @@ message CrawlRecord {
     // time the doc fetched
     int64 fetch_time = 3;
     int64 fetch_use_inms = 4;
+
+    string parent_docid = 10;
 }
 
 message CrawlParam {
@@ -126,11 +126,7 @@ message CrawlParam {
     bool drop_content = 5;
     bool nofollow = 6;
 
-    string store_engine = 7;
-    string store_db = 8;
-    string store_table = 9;
-
-    string fake_host = 10; // filll from config file
+    string fake_host = 10; // fill from config file
     FetchHint fetch_hint = 11;
     repeated ConnectionInfo receivers = 12; // fill from config file
 
@@ -139,6 +135,7 @@ message CrawlParam {
     bool use_proxy = 22;
     bool follow_redirect = 23;
 
+    string taskid = 100;
     RequestType rtype = 101;
     string primary_tag = 102;
     repeated string secondary_tag = 103;
