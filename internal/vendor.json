@@ -98,10 +98,25 @@
 			"revisionTime": "2018-04-17T15:55:33+08:00"
 		},
 		{
+			"path": "github.com/spaolacci/murmur3",
+			"revision": "f09979ecbc725b9e6d41a297405f65e7e8804acc",
+			"revisionTime": "2018-01-18T12:28:30-08:00"
+		},
+		{
 			"origin": "galaxy_walker/internal/github.com/vharitonsky/iniflags",
 			"path": "github.com/vharitonsky/iniflags",
 			"revision": "99725ab586aa3bb39eb7a960f3ca6bf298c68646",
 			"revisionTime": "2018-04-17T16:52:27+08:00"
+		},
+		{
+			"path": "github.com/willf/bitset",
+			"revision": "1a37ad96e8c1a11b20900a232874843b5174221f",
+			"revisionTime": "2017-09-04T20:26:39-04:00"
+		},
+		{
+			"path": "github.com/willf/bloom",
+			"revision": "54e3b963ee1652b06c4562cb9b6020ebc6e36e59",
+			"revisionTime": "2017-05-05T18:16:40-04:00"
 		},
 		{
 			"path": "golang.org/x/net/context",
