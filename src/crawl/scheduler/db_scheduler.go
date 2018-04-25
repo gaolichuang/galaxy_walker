@@ -11,17 +11,32 @@ import (
 )
 
 type DBScheduler struct {
+    // support fresh duplicate
 	bf *bloom.BloomFilter
 }
 
 func (s *DBScheduler) Run() {
 
 }
-func (s *DBScheduler) Fresh(taskid string, num int) []*pb.CrawlDoc {
+func (s *DBScheduler) ScanFresh(taskid string, num int) []*pb.CrawlDoc {
 	/*
 	   undo的
 	   失败重试
 	   超时
 	*/
 	return nil
+}
+func (s *DBScheduler) MarkFinishAndFail(taskid string, docs []*pb.CrawlDoc) {
+    /*
+       undo的
+       失败重试
+       超时
+    */
+}
+func (s *DBScheduler) SetFresh(taskid string, docs []*pb.CrawlDoc) {
+    /*
+       undo的
+       失败重试
+       超时
+    */
 }
