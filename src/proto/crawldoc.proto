@@ -76,7 +76,7 @@ enum ReturnType {
 // like primary_tag and second_tag
 enum RequestType {
     TESTING = 0;
-    NORMALDOC = 1;
+    WEB_StartUp = 1; // start from here
     WEB_MAIN = 2;
     WEB_HUB = 3;
     WEB_CONTENT = 4;

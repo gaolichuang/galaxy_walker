@@ -14,6 +14,10 @@ type TaskItf interface {
     GetJobDescription() *JobDescription
     /*
     发现下一级 新的连接
+    需要标记下级的 requesttype
+    第一级type默认是 pb.RequestType_WEB_StartUp
+
+    通过requesttype和process中针对不同requesttype的处理，形成状态机
     */
     Process(rtype pb.RequestType, doc *pb.CrawlDoc) []*pb.CrawlDoc
 }

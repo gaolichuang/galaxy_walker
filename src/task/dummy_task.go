@@ -15,6 +15,10 @@ func (d *DummyTask)GetJobDescription() *JobDescription {
     return nil
 }
 func (d *DummyTask)Process(rtype pb.RequestType, doc *pb.CrawlDoc) []*pb.CrawlDoc {
+    if rtype == pb.RequestType_WEB_StartUp {
+        // start url
+
+    }
     return nil
 }
 
