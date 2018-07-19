@@ -98,6 +98,7 @@ message ConnectionInfo {
 message OutLink {
     string url = 1;
     string text = 2;
+    int32 num = 3;
 }
 
 message FetchHint {
@@ -125,6 +126,7 @@ message CrawlParam {
     int32 fetcher_count = 4; // for multi fetcher, default should set 1, come from config file.
     bool drop_content = 5;
     bool nofollow = 6;
+    bool noExtractLink = 7; // use at dochandler, default is extractlink
 
     string fake_host = 10; // fill from config file
     FetchHint fetch_hint = 11;
@@ -200,6 +202,7 @@ message CrawlDoc {
     CrawlParam crawl_param = 50;
     CrawlRecord crawl_record = 60;
 
+    // http connection will follow redirect by CrawlParams.follow_redirect. so this field is not nessary and useful
     repeated CrawlChain redirectChain = 70;
 }
 message CrawlDocs {

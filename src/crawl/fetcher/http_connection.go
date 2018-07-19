@@ -32,7 +32,7 @@ var GeneralHeader = map[string]string{
     "Accept-Encoding": "gzip",
     "Connection":      "close",
     //    "Connection":"keep-alive",
-    "User-Agent": "MustardSpider",
+    "User-Agent": "XXSpider",
 }
 
 type FetchTimeout struct {
@@ -104,7 +104,7 @@ func (c *Connection) FetchOne(doc *pb.CrawlDoc, f func(*pb.CrawlDoc, *Connection
         if dumpErr != nil {
             respErr = dumpErr.Error()
         }
-        LOG.VLog(4).Debugf("Dump Response(Error:%s):\n%s", respMsg, respErr)
+        LOG.VLog(5).Debugf("Dump Response(Error:%s):\n%s", respErr,respMsg)
     }
     if err != nil && strings.Contains(err.Error(), "use of closed network connection") {
         c.httpProxy.MarkDeadProxy(c.clientGenerator.GetProxyUrl())

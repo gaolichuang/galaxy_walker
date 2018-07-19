@@ -1,4 +1,4 @@
-# spider
+# Spider
 ## init
 > govender init
 
@@ -42,7 +42,6 @@ proto
 5.去重复
 6.抽链; 内部链接;外部链接
 
-
 页面分析部分
 1.html dom 抽取有效区域
 2.regex 提取需要字段  http://www.cnblogs.com/golove/p/3269099.html
@@ -54,3 +53,34 @@ proto
 1.遍历
 2.读写
 3.文件形式; 列表页;内容页;防止重复抓取
+
+Statistic Receiver
+1.半小时/一小时/一天，非实时统计
+- Fresh/Recrawl
+- Success/code....
+- total/...
+
+contentDb
+选型： leveldb? pb
+需求
+- check url exist.
+- update or not? how many replica should save?
+- 指定时间段是否抓取过XX? 这个需要靠scan全表
+是否需要一天一个表？
+
+schema.key:  task + docid + timeStamp
+op:
+scan.
+check exist.
+
+
+MergedContentDb? 是否需要离线任务整合？带索引的？
+
+urlDb
+选型:sqlite?
+url,normalizeurl,level,discover time, crawltime,failnum,parenturl
+需求
+- derepeate? maybe load into bloom filter
+
+otherdb
+1.taskDB,task config 

@@ -22,10 +22,15 @@ type DocHandler struct {
     htmlParser *page_analysis.HtmlParser
     doc        *proto.CrawlDoc
     domain     string
+    // Distinct: key is OutLink.url + OutLink.text
+    indomainDict map[string]*proto.OutLink
+    outdomainDict map[string]*proto.OutLink
 }
 
 func (handler *DocHandler) Init() bool {
     handler.htmlParser = page_analysis.NewHtmlParser()
+    handler.indomainDict = make(map[string]*proto.OutLink)
+    handler.outdomainDict = make(map[string]*proto.OutLink)
     handler.htmlParser.RegisterSelector("a", handler.extractLinkCallBack)
     return true
 }
@@ -35,7 +40,7 @@ func (handler *DocHandler) extractLinkCallBack(i int, s *goquery.Selection) {
         return
     }
     if !(strings.HasPrefix(href, "/") || strings.HasPrefix(href, "http") || strings.HasPrefix(href, ".")) {
-        LOG.VLog(4).Debugf("Not Avaliable link %s", href)
+        LOG.VLog(5).Debugf("Not Avaliable link %s", href)
         return
     }
     nofollow, nofollowexit := s.Attr("rel")
@@ -47,40 +52,66 @@ func (handler *DocHandler) extractLinkCallBack(i int, s *goquery.Selection) {
         return
     }
     text := string_util.Purify(s.Text(), "\n", "\t", " ")
+    href = string_util.Purify(href, "\n", "\t", "")
     if strings.HasPrefix(href, "/") {
         requrl, _ := url.Parse(handler.doc.RequestUrl)
-        LOG.VLog(6).Debugf("InDomainLinkFill %s,text:%U", href, text)
-        handler.doc.IndomainOutlinks = append(handler.doc.IndomainOutlinks, &proto.OutLink{
-            Url:  fmt.Sprintf("%s://%s%s", requrl.Scheme, requrl.Host, href),
-            Text: text,
-        })
+        fixHref := fmt.Sprintf("%s://%s%s", requrl.Scheme, requrl.Host, href)
+        LOG.VLog(6).Debugf("InDomainLinkFill %s,text:%s,fixhref %s", href, text,fixHref)
+        key := fixHref + "^_^" + text
+        if _,ok := handler.indomainDict[key];ok {
+            handler.indomainDict[key].Num += 1
+        } else {
+            handler.indomainDict[key] = &proto.OutLink{
+                Url:  fixHref,
+                Text: text,
+                Num:1,
+            }
+        }
     } else {
         newdomain := utils.GetDomainFromHost(url_parser.GetHost(href))
+        key := href + "^_^" + text
         if utils.IsSameDomain(newdomain, handler.domain) {
-            LOG.VLog(6).Debugf("InDomainLink %s,text:%U", href, text)
-            handler.doc.IndomainOutlinks = append(handler.doc.IndomainOutlinks, &proto.OutLink{
-                Url:  href,
-                Text: text,
-            })
+            if _,ok := handler.indomainDict[key];ok {
+                LOG.VLog(5).Debugf("InDomainLink Add %s,text:%s", href, text)
+                handler.indomainDict[key].Num += 1
+            } else {
+                handler.indomainDict[key] = &proto.OutLink{
+                    Url:  href,
+                    Text: text,
+                }
+            }
         } else {
-            LOG.VLog(6).Debugf("OutDomainLink %s,text:%s", href, text)
-            handler.doc.OutdomainOutlinks = append(handler.doc.OutdomainOutlinks, &proto.OutLink{
-                Url:  href,
-                Text: text,
-            })
+            if _,ok := handler.outdomainDict[key];ok {
+                LOG.VLog(5).Debugf("OutDomainLink Add %s,text:%s", href, text)
+                handler.outdomainDict[key].Num += 1
+            } else {
+                handler.outdomainDict[key] = &proto.OutLink{
+                    Url:  href,
+                    Text: text,
+                }
+            }
         }
     }
 }
 func (handler *DocHandler) Accept(crawlDoc *proto.CrawlDoc) bool {
-    return utils.IsCrawlSuccess(crawlDoc.Code)
+    return utils.IsCrawlSuccess(crawlDoc.Code) && !crawlDoc.CrawlParam.NoExtractLink
 }
 func (handler *DocHandler) Process(crawlDoc *proto.CrawlDoc) {
     LOG.VLog(3).Debugf("[%s]Process One Doc %s ",
         reflect.Indirect(reflect.ValueOf(handler)).Type().Name(),
         crawlDoc.Url)
     handler.doc = crawlDoc
-    handler.domain = utils.GetDomainFromHost(url_parser.GetHost(crawlDoc.RequestUrl))
+    handler.domain = utils.GetDomainFromHost(url_parser.GetHost(crawlDoc.Url))
     handler.htmlParser.Parse(handler.doc.Url, handler.doc.Content)
+    // merge indomain,outdomain
+    for _,v := range handler.indomainDict {
+        handler.doc.IndomainOutlinks = append(handler.doc.IndomainOutlinks,v)
+    }
+    for _,v := range handler.outdomainDict {
+        handler.doc.OutdomainOutlinks = append(handler.doc.OutdomainOutlinks,v)
+    }
+    handler.indomainDict = nil
+    handler.outdomainDict = nil
     LOG.VLog(4).Debugf("DocHandler. DumpCrawlDoc\n%s", utils.DumpCrawlDoc(crawlDoc))
 }
 

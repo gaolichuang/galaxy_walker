@@ -212,7 +212,7 @@ func (d *Dispatcher) SelectCrawler(doc *pb.CrawlDoc) uint32 {
     var crawlerId uint32 = (base_index + offset) % uint32(len(d.feeders.feeders))
     var live_crawler_id uint32 = crawlerId
 
-    for true {
+    for {
         _, present := d.feeders.deadFeeders[live_crawler_id]
         if !present {
             break
