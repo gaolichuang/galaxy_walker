@@ -8,6 +8,11 @@
 			"revisionTime": "2018-04-17T15:55:33+08:00"
 		},
 		{
+			"path": "gcodebase/application",
+			"revision": "fa39afbb0dc2bef0f6a1bda0ffaff5dfda961ad8",
+			"revisionTime": "2018-07-20T13:26:03+08:00"
+		},
+		{
 			"path": "gcodebase/babysitter",
 			"revision": "23aa181724bea9461f084a2383ad7636061c438e",
 			"revisionTime": "2018-04-17T15:55:33+08:00"
@@ -38,9 +43,29 @@
 			"revisionTime": "2018-04-17T15:55:33+08:00"
 		},
 		{
+			"path": "gcodebase/ipset",
+			"revision": "fa39afbb0dc2bef0f6a1bda0ffaff5dfda961ad8",
+			"revisionTime": "2018-07-20T13:26:03+08:00"
+		},
+		{
 			"path": "gcodebase/log",
 			"revision": "23aa181724bea9461f084a2383ad7636061c438e",
 			"revisionTime": "2018-04-17T15:55:33+08:00"
+		},
+		{
+			"path": "gcodebase/notify",
+			"revision": "fa39afbb0dc2bef0f6a1bda0ffaff5dfda961ad8",
+			"revisionTime": "2018-07-20T13:26:03+08:00"
+		},
+		{
+			"path": "gcodebase/persistent",
+			"revision": "fa39afbb0dc2bef0f6a1bda0ffaff5dfda961ad8",
+			"revisionTime": "2018-07-20T13:26:03+08:00"
+		},
+		{
+			"path": "gcodebase/slack",
+			"revision": "fa39afbb0dc2bef0f6a1bda0ffaff5dfda961ad8",
+			"revisionTime": "2018-07-20T13:26:03+08:00"
 		},
 		{
 			"path": "gcodebase/string_util",
@@ -96,6 +121,11 @@
 			"path": "github.com/gorilla/mux",
 			"revision": "23aa181724bea9461f084a2383ad7636061c438e",
 			"revisionTime": "2018-04-17T15:55:33+08:00"
+		},
+		{
+			"path": "github.com/nlopes/slack",
+			"revision": "67c6939dd382a85ccbbe2f2e133fd245fe424098",
+			"revisionTime": "2016-05-31T10:35:27+01:00"
 		},
 		{
 			"path": "github.com/spaolacci/murmur3",
@@ -160,6 +190,11 @@
 		},
 		{
 			"path": "golang.org/x/net/trace",
+			"revision": "1dd0d85fc0634d2dbe7f7d06d176c2ff548e6332",
+			"revisionTime": "2016-03-28T01:10:31-07:00"
+		},
+		{
+			"path": "golang.org/x/net/websocket",
 			"revision": "1dd0d85fc0634d2dbe7f7d06d176c2ff548e6332",
 			"revisionTime": "2016-03-28T01:10:31-07:00"
 		},
