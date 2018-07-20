@@ -1,0 +1,5 @@
+package leveldb
+
+func MergeContentDbProcess() {
+
+}

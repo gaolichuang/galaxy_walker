@@ -71,8 +71,8 @@ func (handler *DocHandler) extractLinkCallBack(i int, s *goquery.Selection) {
         newdomain := utils.GetDomainFromHost(url_parser.GetHost(href))
         key := href + "^_^" + text
         if utils.IsSameDomain(newdomain, handler.domain) {
+            LOG.VLog(5).Debugf("InDomainLink Add %s,text:%s", href, text)
             if _,ok := handler.indomainDict[key];ok {
-                LOG.VLog(5).Debugf("InDomainLink Add %s,text:%s", href, text)
                 handler.indomainDict[key].Num += 1
             } else {
                 handler.indomainDict[key] = &proto.OutLink{
@@ -81,8 +81,8 @@ func (handler *DocHandler) extractLinkCallBack(i int, s *goquery.Selection) {
                 }
             }
         } else {
+            LOG.VLog(5).Debugf("OutDomainLink Add %s,text:%s", href, text)
             if _,ok := handler.outdomainDict[key];ok {
-                LOG.VLog(5).Debugf("OutDomainLink Add %s,text:%s", href, text)
                 handler.outdomainDict[key].Num += 1
             } else {
                 handler.outdomainDict[key] = &proto.OutLink{

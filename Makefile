@@ -12,6 +12,6 @@ dev:
 	go tool vet src
 
 test:
-	go test ./src/...
+	go test -v ./src/...
 clean:
 	rm ./bin/*_main
