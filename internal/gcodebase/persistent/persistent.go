@@ -1,8 +1,8 @@
 package persistent
 import (
-        "gcodebase/conf"
-        "gcodebase/file"
-        "gcodebase/log"
+        "galaxy_walker/internal/gcodebase/conf"
+        "galaxy_walker/internal/gcodebase/file"
+        "galaxy_walker/internal/gcodebase/log"
         "path/filepath"
         "io/ioutil"
         "fmt"

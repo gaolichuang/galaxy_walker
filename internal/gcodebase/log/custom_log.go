@@ -36,7 +36,8 @@ func (c *CustomLoggerSingle)Logf(format string, v ...interface{}) {
         c.Logger.Output(2, fmt.Sprintf(format, v...))
 }
 func (c *CustomLoggerSingle)LogTag(TAG, format string, v ...interface{}) {
-        c.Logger.Output(2, fmt.Sprintf("[%s]%s", TAG, fmt.Sprintf(format, v...)))
+        c.Logger.Output(2, "["+TAG + "]"+fmt.Sprintf(format,v...))
+        //c.Logger.Output(2, fmt.Sprintf("[%s]%s", TAG, fmt.Sprintf(format, v...)))
 }
 
 func NewCustomLogger(logFile string) (*CustomLoggerSingle, error) {

@@ -87,10 +87,11 @@ func getUrlWithHeaderAndTimeOutInternal(method, url, body string, header map[str
                         }(urlParserObj.Scheme),
                 },
         }
-	request, _ := http.NewRequest(method, url, nil)
-	if method == "POST" {
-		request, _ = http.NewRequest("POST", url, strings.NewReader(body))
-
+	var request *http.Request
+	if body == "" {
+		request, _ = http.NewRequest(method, url, nil)
+	} else {
+		request, _ = http.NewRequest(method, url, strings.NewReader(body))
 	}
 	request.Header.Set("Accept-Encoding", "gzip,deflate")
 	request.Header.Set("Accept-Language", "zh-CN,zh;q=0.8")

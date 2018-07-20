@@ -7,9 +7,9 @@ import (
         "strconv"
         "strings"
         "time"
-        "gcodebase/file"
+        "galaxy_walker/internal/gcodebase/file"
         "sync"
-        LOG "gcodebase/log"
+        LOG "galaxy_walker/internal/gcodebase/log"
 )
 
 type Application struct {

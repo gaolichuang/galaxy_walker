@@ -314,85 +314,89 @@ func FileLineNumAndByteCounts(filename string) (error, int, int) {
     return nil, lineNum, bytes
 }
 func CopyFile(srcFilePath, targetPath string) error {
-    var err error
-    var targetFilePath string
-    if !Exist(srcFilePath) {
-        return fmt.Errorf("%s NOT exist", srcFilePath)
-    }
-    srcInfo, err := os.Stat(srcFilePath)
-    if err != nil {
-        return err
-    }
-    if Exist(targetPath) {
-        if IsDir(targetPath) {
-            targetFilePath = filepath.Join(targetPath, srcInfo.Name())
-        } else {
-            targetFilePath = targetPath
+        var err error
+        var targetFilePath string
+        if !Exist(srcFilePath) {
+                return fmt.Errorf("%s NOT exist", srcFilePath)
         }
-    } else {
-        if !Exist(filepath.Dir(targetPath)) {
-            if err = MkDirAll(filepath.Dir(targetPath)); err != nil {
+        srcInfo, err := os.Stat(srcFilePath)
+        if err != nil {
                 return err
-            }
         }
-        targetFilePath = targetPath
-    }
-    srcFile, err := os.Open(srcFilePath)
-    if err != nil {
-        return err
-    }
-    defer srcFile.Close()
-    targetFile, err := os.Create(targetFilePath)
-    if err != nil {
-        return err
-    }
-    defer targetFile.Close()
-    _, err = io.Copy(targetFile, srcFile)
-    if err != nil {
-        return err
-    }
-    return nil
-}
-func CopyDir(sourceDirPath, targetPath string) error {
-    var err error
-    if !IsDir(sourceDirPath) {
-        return fmt.Errorf("%s is NOT Dir", sourceDirPath)
-    }
-    if Exist(targetPath) && !IsDir(targetPath) {
-        return fmt.Errorf("%s Specified Must be a Dir", targetPath)
-    }
-    srcInfo, err := os.Stat(sourceDirPath)
-    if err != nil {
-        return err
-    }
-    if err = MkDirAll(filepath.Join(targetPath, srcInfo.Name())); err != nil {
-        return err
-    }
-    files, err := ioutil.ReadDir(sourceDirPath)
-    if err != nil {
-        return err
-    }
-    for _, f := range files {
-        if f.IsDir() {
-            CopyDir(filepath.Join(sourceDirPath, f.Name()), filepath.Join(targetPath, srcInfo.Name()))
+        if Exist(targetPath) {
+                if IsDir(targetPath) {
+                        targetFilePath = filepath.Join(targetPath, srcInfo.Name())
+                } else {
+                        targetFilePath = targetPath
+                }
         } else {
-            CopyFile(filepath.Join(sourceDirPath, f.Name()), filepath.Join(targetPath, srcInfo.Name()))
+                if !Exist(filepath.Dir(targetPath)) {
+                        if err = MkDirAll(filepath.Dir(targetPath)); err != nil {
+                                return err
+                        }
+                }
+                targetFilePath = targetPath
         }
-    }
-    return nil
+        srcFile, err := os.Open(srcFilePath)
+        if err != nil {
+                return err
+        }
+        defer srcFile.Close()
+        tmpName := genWriteFileTemporaryName(targetFilePath)
+        tmpFile, err := os.Create(tmpName)
+        if err != nil {
+                return err
+        }
+        defer tmpFile.Close()
+        _, err = io.Copy(tmpFile, srcFile)
+        if err != nil {
+                return err
+        }
+        return os.Rename(tmpName, targetFilePath)
+}
+func CopyDir(sourceDirPath, targetPath string, onlyCopyCont bool) error {
+        var err error
+        if !IsDir(sourceDirPath) {
+                return fmt.Errorf("%s is NOT Dir", sourceDirPath)
+        }
+        if Exist(targetPath) && !IsDir(targetPath) {
+                return fmt.Errorf("%s Specified Must be a Dir", targetPath)
+        }
+        srcInfo, err := os.Stat(sourceDirPath)
+        if err != nil {
+                return err
+        }
+        if !onlyCopyCont {
+                if err = MkDirAll(filepath.Join(targetPath, srcInfo.Name())); err != nil {
+                        return err
+                }
+                targetPath = filepath.Join(targetPath, srcInfo.Name())
+        }
+        files, err := ioutil.ReadDir(sourceDirPath)
+        if err != nil {
+                return err
+        }
+        for _, f := range files {
+                if f.IsDir() {
+                        CopyDir(filepath.Join(sourceDirPath, f.Name()), targetPath, false)
+                } else {
+                        CopyFile(filepath.Join(sourceDirPath, f.Name()), targetPath)
+                }
+        }
+        return nil
 }
 func Copy(source, targetPath string) error {
-    var err error
-    if !Exist(source) {
-        return fmt.Errorf("%s NOT exist", source)
-    }
-    if IsDir(source) {
-        err = CopyDir(source, targetPath)
-    } else {
-        err = CopyFile(source, targetPath)
-    }
-    if err != nil {
-        return err
-    }
-    return nil
+        var err error
+        if !Exist(source) {
+                return fmt.Errorf("%s NOT exist", source)
+        }
+        if IsDir(source) {
+                err = CopyDir(source, targetPath, false)
+        } else {
+                err = CopyFile(source, targetPath)
+        }
+        if err != nil {
+                return err
+        }
+        return nil
 }
