@@ -1,12 +1,8 @@
 #!/bin/bash
 
 ###### production mode ############
-# <tag>_<service>_<replica>_<shard>
-# sample: crawler_dispatcher_0_0
-# bin: /Application/mustard/crawler_dispatcher_0_0/bin/dispatcher_main
-# log: /Application/mustard/crawler_dispatcher_0_0/logs/dispatcher.log
 ##################################
-PRODUCT_PREFIX="/Application/mustard"
+PRODUCT_PREFIX="/Application/galaxy"
 
 #### Alpha env default #####
 BIN_PATH=../bin
@@ -18,7 +14,7 @@ REPLICA=0
 SHARD=0
 
 # HTTP_PORT_BASE - 50 == SERVICE_PORT
-SERVICE_PORT=9100
+SERVICE_PORT=9060
 
 get_runtime_path() {
   CPATH=$1
@@ -65,18 +61,9 @@ HPORT=$(($PORT + 50))
 LOG_FILE=$LOG_PATH/`basename $BIN`.log
 mkdir -p  $LOG_PATH
 
-    #--crawl_handler_chain=FetchHandler;PrepareHandler;DocHandler;StorageHandler;ResponseHandler
 CMD="$BIN
-    --crawl_handler_chain=DummyRequestProcessor;FetchHandler;PrepareHandler;DocHandler;StorageHandler
-    --crawl_input_processor=RequestProcessor
-    --proxy_conf_file=etc/crawl/fetch_proxys.config
-    --channel_buffer_size=10
-    --host_load_queue_size=10
-    --fetch_connection_number=20
-    --crawl_request_port=$PORT
     --conf_path_prefix=$MDATA
-    --http_port=$HPORT
-    --v=5
+    --v=6
     --stdout=true"
 checkOnce() {
   pnum=`ps -ef |grep "$BIN"|grep -c $HPORT`
@@ -84,7 +71,7 @@ checkOnce() {
   return $?
 }
 check() {
-  for (( c=1; c<=15; c++ ))
+  for (( c=1; c<=20; c++ ))
   do
     sleep 1
     checkOnce
@@ -95,6 +82,29 @@ check() {
   return 1
 }
 start() {
+  ulimit -n unlimited
+  # clear log...
+  rm $LOG_FILE
+  # open gctrace.
+  export GODEBUG=gctrace=1
+  export GOTRACEBACK=crash
+  echo $CMD
+  checkOnce
+  if [ $? -eq 0 ];then
+    echo "It's already run."
+    return 0
+  fi
+  nohup $CMD >> $LOG_FILE 2>&1 &
+  check
+  if [ $? -eq 0 ];then
+      echo "Start Finish."
+      return 0
+  else
+      echo "Start Fail."
+      return 2
+  fi
+}
+reborn() {
   ulimit -n unlimited
   # clear log...
   rm $LOG_FILE
@@ -137,7 +147,7 @@ startDirect() {
   echo $CMD
   $CMD
 }
-Usage="Usage:`basename $0` [start|stop|status|stdout]"
+Usage="Usage:`basename $0` [start|stop|status|stdout|reborn]"
 if [ $# -ne 1 ];then
   echo $Usage
   exit 1
@@ -145,6 +155,8 @@ fi
 
 if [ $1 == "start" ];then
   start
+elif [ $1 == "reborn" ];then
+  reborn
 elif [ $1 == "stop" ];then
   stop
 elif [ $1 == "status" ];then

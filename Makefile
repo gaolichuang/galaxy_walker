@@ -7,6 +7,8 @@ build:
 	go build -o bin/dispatcher_main ./src/main/dispatcher_main.go
 	go build -o bin/online-crawltask_main ./src/main/online-crawltask_main.go
 	go build -o bin/file-scheduler_main ./src/main/file-scheduler_main.go
+
+	go build -o bin/merge-contentdb_main ./src/db/leveldb/main/merge-contentdb_main.go
 dev:
 	mkdir -p ./bin
 	go tool vet src

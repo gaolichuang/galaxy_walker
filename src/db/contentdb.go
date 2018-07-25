@@ -2,7 +2,7 @@ package db
 
 import (
     pb "galaxy_walker/src/proto"
-
+    "galaxy_walker/src/db/leveldb"
 )
 /*
 根据抓取时间将content存储下来，支持查询。顺序写
@@ -25,7 +25,7 @@ type ContentDBItf interface {
         if maxnum < 0, will read all doc
         return value: error, iterator, batch doc.
     */
-    ScanWithIterator(task, iterator string, maxnum int) (error,string,[]*pb.CrawlDoc)
+    ScanWithIterator(task, iterator string, maxnum int) (string,[]*pb.CrawlDoc)
     // for statistic.
     ScanKey(task string) []string
 
@@ -37,5 +37,5 @@ type ContentDBItf interface {
 }
 
 func NewContentDBItf() ContentDBItf {
-    return nil
+    return leveldb.NewContentDbByLevelDB()
 }

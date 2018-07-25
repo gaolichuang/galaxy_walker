@@ -7,6 +7,7 @@ import (
     "galaxy_walker/internal/gcodebase/file"
     LOG "galaxy_walker/internal/gcodebase/log"
     "galaxy_walker/internal/gcodebase/time_util"
+    "galaxy_walker/internal/gcodebase/conf"
 
     "fmt"
     "strings"
@@ -40,13 +41,15 @@ const (
     kSubFixPath       = "leveldb"
     kMaxTimeStampKey = 3000000000
     kMaxDocId = 1<<32-1
+    kConstMergedbBatchSize = 2000
 )
+var CONF = conf.Conf
 
 var Db *leveldb.DB
 var DbConf string
 
-func InitDb(dbfile string) {
-    dbfile = filepath.Join(file.GetConfFile(dbfile), kSubFixPath)
+func InitDb() {
+    dbfile := filepath.Join(*CONF.ConfPathPrefix,*CONF.Crawler.ContentDbLevelDbFile,kSubFixPath)
     if !file.Exist(dbfile) {
         err := file.MkDirAll(dbfile)
         if err != nil {
@@ -138,7 +141,10 @@ func parseMergedDbKey(key string) (err error, task string, docid uint32, timesta
 }
 
 /////////////////////////////////
-
+func NewContentDbByLevelDB() *ContentDBByLevelDB {
+    InitDb()
+    return &ContentDBByLevelDB{}
+}
 type ContentDBByLevelDB struct {
 }
 
@@ -271,7 +277,7 @@ func (db *ContentDBByLevelDB) GetDocById(task string, docid uint32) []*pb.CrawlD
     LOG.VLog(3).DebugTag("Leveldb", "GetDocById %s %d record use %d ms",task,len(ret), time_util.GetTimeInMs()-t1)
     return ret
 }
-func (db *ContentDBByLevelDB) getKeyDocById(task string, docid uint32) [][]byte {
+func getKeyDocById(task string, docid uint32) [][]byte {
     var errr error
     Db, errr = leveldb.OpenFile(DbConf, nil)
     if errr != nil {
@@ -296,9 +302,42 @@ func (db *ContentDBByLevelDB) getKeyDocById(task string, docid uint32) [][]byte 
 /*
 from merged db
 */
-func (db *ContentDBByLevelDB) ScanWithIterator(task, iterator string, maxnum int) (error, string, []*pb.CrawlDoc) {
-
-    return nil, "", nil
+func (db *ContentDBByLevelDB) ScanWithIterator(task, iterator string, maxnum int) (string, []*pb.CrawlDoc) {
+    var errr error
+    Db, errr = leveldb.OpenFile(DbConf, nil)
+    if errr != nil {
+        LOG.Fatalf("Open Leveldb Err:%v, use %s", errr, DbConf)
+    }
+    defer Db.Close()
+    t1 := time_util.GetTimeInMs()
+    skey := iterator
+    if skey == "" {
+        skey = mergedDbKey(task,0,0)
+    }
+    ekey := mergedDbKey(task,kMaxDocId,kMaxTimeStampKey)
+    iter := Db.NewIterator(&util.Range{
+        Start:[]byte(skey),
+        Limit:[]byte(ekey),
+    },nil)
+    ret := make([]*pb.CrawlDoc,0)
+    num := 0
+    if maxnum <=0 {maxnum = kConstMergedbBatchSize}
+    var nextkey []byte
+    for iter.Next()&&num<maxnum {
+        nextkey = iter.Key()
+        value := iter.Value()
+        doc := new(pb.CrawlDoc)
+        err := proto.Unmarshal(value,doc)
+        if err != nil {
+            LOG.VLog(2).DebugTag("LevelDb", "ScanWithIterator %s proto marshal err %v", string(nextkey), err)
+            continue
+        }
+        ret = append(ret,doc)
+        num += 1
+    }
+    LOG.VLog(3).DebugTag("Leveldb", "ScanWithIterator %s %d, nextkey:%s record use %d ms",task,len(ret),nextkey,time_util.GetTimeInMs()-t1)
+    nextkey[len(nextkey)-1] += 1
+    return string(nextkey),ret
 }
 // from mergeddb
 func (db *ContentDBByLevelDB)ScanKey(task string) []string {
@@ -335,7 +374,7 @@ func (db *ContentDBByLevelDB) DeleteBatch(task string, docids []uint32) (error, 
     t1 := time_util.GetTimeInMs()
     batch := new(leveldb.Batch)
     for _,docid := range docids {
-        keys := db.getKeyDocById(task,docid)
+        keys := getKeyDocById(task,docid)
         for _,k := range keys {
             batch.Delete(k)
         }

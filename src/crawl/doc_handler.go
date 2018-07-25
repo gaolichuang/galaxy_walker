@@ -110,8 +110,8 @@ func (handler *DocHandler) Process(crawlDoc *proto.CrawlDoc) {
     for _,v := range handler.outdomainDict {
         handler.doc.OutdomainOutlinks = append(handler.doc.OutdomainOutlinks,v)
     }
-    handler.indomainDict = nil
-    handler.outdomainDict = nil
+    handler.indomainDict = make(map[string]*proto.OutLink)
+    handler.outdomainDict = make(map[string]*proto.OutLink)
     LOG.VLog(4).Debugf("DocHandler. DumpCrawlDoc\n%s", utils.DumpCrawlDoc(crawlDoc))
 }
 

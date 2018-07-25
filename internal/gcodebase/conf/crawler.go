@@ -40,6 +40,8 @@ type CrawlerType struct {
 	JobDescriptionConfFile *string
 	// fetcher
 	ProxyConfFile *string
+	// handler
+	ContentDbLevelDbFile *string
 
 	// task
 	CrawlTaskName *string
@@ -78,5 +80,6 @@ var CrawlerConf = CrawlerType{
 	ProxyConfFile:            flag.String("proxy_conf_file", "etc/crawl/fetch_proxys.config", "each line is a proxy host:port"),
 	JobDescriptionConfFile:   flag.String("job_description_conf_file", "etc/crawl/job_description.json", "get job description from file"),
     CrawlTaskName: flag.String("crawl_task","","crawl task itf name"),
+    ContentDbLevelDbFile :flag.String("contentdb_leveldb","db/contentdb","contentdb leveldb file path"),
 
 }
