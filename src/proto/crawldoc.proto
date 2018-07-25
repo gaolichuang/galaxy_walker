@@ -116,7 +116,7 @@ message CrawlRecord {
     int64 fetch_time = 3;
     int64 fetch_use_inms = 4;
 
-    string parent_docid = 10;
+
 }
 
 message CrawlParam {
@@ -139,8 +139,16 @@ message CrawlParam {
 
     string taskid = 100;
     RequestType rtype = 101;
-    string primary_tag = 102;
-    repeated string secondary_tag = 103;
+    // record crawl level.
+    string parent_docid = 102;
+    RequestType parent_rtype = 103;
+    // crawl fail retry number.
+    int32 retry_number = 104;
+    // url fresh found timestamp in second.
+    int64 discover_time = 105;
+
+    string primary_tag = 202;
+    repeated string secondary_tag = 203;
 }
 
 // for follow redirect.
