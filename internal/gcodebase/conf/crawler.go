@@ -42,6 +42,7 @@ type CrawlerType struct {
 	ProxyConfFile *string
 	// handler
 	ContentDbLevelDbFile *string
+    UrlDbSQLiteFile *string
 
 	// task
 	CrawlTaskName *string
@@ -81,5 +82,6 @@ var CrawlerConf = CrawlerType{
 	JobDescriptionConfFile:   flag.String("job_description_conf_file", "etc/crawl/job_description.json", "get job description from file"),
     CrawlTaskName: flag.String("crawl_task","","crawl task itf name"),
     ContentDbLevelDbFile :flag.String("contentdb_leveldb","db/contentdb","contentdb leveldb file path"),
+    UrlDbSQLiteFile :flag.String("urldb_sqlite","db/urldb.db","urldb sqlite file"),
 
 }

@@ -113,6 +113,11 @@
 			"revisionTime": "2016-03-25T15:23:39+08:00"
 		},
 		{
+			"path": "github.com/golang/snappy",
+			"revision": "553a641470496b2327abcac10b36396bd98e45c9",
+			"revisionTime": "2017-02-16T10:32:05+11:00"
+		},
+		{
 			"path": "github.com/gorilla/context",
 			"revision": "aced737ba53dfdf7ac3fadae7f653afa54fbb20b",
 			"revisionTime": "2016-05-15T16:41:58+08:00"
@@ -123,6 +128,11 @@
 			"revisionTime": "2018-04-17T15:55:33+08:00"
 		},
 		{
+			"path": "github.com/mattn/go-sqlite3",
+			"revision": "fba66eb11643069e747022997e9be3b502b2c6fb",
+			"revisionTime": "2016-11-12T01:58:19+09:00"
+		},
+		{
 			"path": "github.com/nlopes/slack",
 			"revision": "67c6939dd382a85ccbbe2f2e133fd245fe424098",
 			"revisionTime": "2016-05-31T10:35:27+01:00"
@@ -131,6 +141,66 @@
 			"path": "github.com/spaolacci/murmur3",
 			"revision": "f09979ecbc725b9e6d41a297405f65e7e8804acc",
 			"revisionTime": "2018-01-18T12:28:30-08:00"
+		},
+		{
+			"path": "github.com/syndtr/goleveldb/leveldb",
+			"revision": "b89cc31ef7977104127d34c1bd31ebd1a9db2199",
+			"revisionTime": "2017-07-24T23:48:36-07:00"
+		},
+		{
+			"path": "github.com/syndtr/goleveldb/leveldb/cache",
+			"revision": "b89cc31ef7977104127d34c1bd31ebd1a9db2199",
+			"revisionTime": "2017-07-24T23:48:36-07:00"
+		},
+		{
+			"path": "github.com/syndtr/goleveldb/leveldb/comparer",
+			"revision": "b89cc31ef7977104127d34c1bd31ebd1a9db2199",
+			"revisionTime": "2017-07-24T23:48:36-07:00"
+		},
+		{
+			"path": "github.com/syndtr/goleveldb/leveldb/errors",
+			"revision": "b89cc31ef7977104127d34c1bd31ebd1a9db2199",
+			"revisionTime": "2017-07-24T23:48:36-07:00"
+		},
+		{
+			"path": "github.com/syndtr/goleveldb/leveldb/filter",
+			"revision": "b89cc31ef7977104127d34c1bd31ebd1a9db2199",
+			"revisionTime": "2017-07-24T23:48:36-07:00"
+		},
+		{
+			"path": "github.com/syndtr/goleveldb/leveldb/iterator",
+			"revision": "b89cc31ef7977104127d34c1bd31ebd1a9db2199",
+			"revisionTime": "2017-07-24T23:48:36-07:00"
+		},
+		{
+			"path": "github.com/syndtr/goleveldb/leveldb/journal",
+			"revision": "b89cc31ef7977104127d34c1bd31ebd1a9db2199",
+			"revisionTime": "2017-07-24T23:48:36-07:00"
+		},
+		{
+			"path": "github.com/syndtr/goleveldb/leveldb/memdb",
+			"revision": "b89cc31ef7977104127d34c1bd31ebd1a9db2199",
+			"revisionTime": "2017-07-24T23:48:36-07:00"
+		},
+		{
+			"path": "github.com/syndtr/goleveldb/leveldb/opt",
+			"revision": "b89cc31ef7977104127d34c1bd31ebd1a9db2199",
+			"revisionTime": "2017-07-24T23:48:36-07:00"
+		},
+		{
+			"path": "github.com/syndtr/goleveldb/leveldb/storage",
+			"revision": "b89cc31ef7977104127d34c1bd31ebd1a9db2199",
+			"revisionTime": "2017-07-24T23:48:36-07:00"
+		},
+		{
+			"path": "github.com/syndtr/goleveldb/leveldb/table",
+			"revision": "b89cc31ef7977104127d34c1bd31ebd1a9db2199",
+			"revisionTime": "2017-07-24T23:48:36-07:00"
+		},
+		{
+			"path": "github.com/syndtr/goleveldb/leveldb/util",
+			"revision": "b89cc31ef7977104127d34c1bd31ebd1a9db2199",
+			"revisionTime": "2017-07-24T23:48:36-07:00"
 		},
 		{
 			"origin": "galaxy_walker/internal/github.com/vharitonsky/iniflags",

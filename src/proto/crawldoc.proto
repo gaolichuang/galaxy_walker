@@ -140,7 +140,7 @@ message CrawlParam {
     string taskid = 100;
     RequestType rtype = 101;
     // record crawl level.
-    string parent_docid = 102;
+    int32 parent_docid = 102;
     RequestType parent_rtype = 103;
     // crawl fail retry number.
     int32 retry_number = 104;
