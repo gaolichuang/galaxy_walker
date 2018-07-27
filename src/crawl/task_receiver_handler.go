@@ -11,7 +11,7 @@ import (
 
 type TaskReceiverHandler struct {
     CrawlHandler
-    dbScheduler *scheduler.DBScheduler
+    dbScheduler *scheduler.TaskDbScheduler
     taskItf task.TaskItf
 }
 func (h *TaskReceiverHandler) RegisterTask(t task.TaskItf) {

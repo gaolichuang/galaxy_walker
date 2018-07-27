@@ -11,7 +11,7 @@ import (
 
 type TaskSchedulerHandler struct {
     CrawlHandler
-    dbScheduler *scheduler.DBScheduler
+    dbScheduler *scheduler.TaskDbScheduler
     docs         []*pb.CrawlDoc
     taskItf task.TaskItf
 }

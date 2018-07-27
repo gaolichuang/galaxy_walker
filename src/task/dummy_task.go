@@ -17,8 +17,9 @@ func (d *DummyTask)GetJobDescription() *JobDescription {
 func (d *DummyTask)Process(rtype pb.RequestType, doc *pb.CrawlDoc) []*pb.CrawlDoc {
     switch rtype {
     case pb.RequestType_WEB_StartUp:
-        // start url
+        // start url, no need doc. just return docs.
     case pb.RequestType_WEB_MAIN:
+        // startup docs. parse and return web hub. mark RequestType.
     case pb.RequestType_WEB_HUB:
     case pb.RequestType_WEB_CONTENT:
     case pb.RequestType_WEB_DETAIL:

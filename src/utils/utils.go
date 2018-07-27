@@ -38,7 +38,9 @@ func IsInvalidUrl(_url string) bool {
     }
     return true
 }
-func IsCrawlSuccess(t pb.ReturnType) bool {
+func IsCrawlSuccess(doc *pb.CrawlDoc) bool {
+    // TODO. soft deadlink??
+    t := doc.Code
     return t == pb.ReturnType_STATUS200 || t == pb.ReturnType_STATUS201
 }
 func IsPermanentRedirect(t pb.ReturnType) bool {

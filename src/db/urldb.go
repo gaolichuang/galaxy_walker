@@ -10,7 +10,7 @@ type UrlDbItf interface {
         新发现的url，如果task表不存在，则创建表
         需要去重复。。。使用task+docid
     */
-    SetFreshUrls(taskid string, parentType int32, parentDocid int32, docs []*pb.CrawlDoc) (error,int)
+    SetFreshUrls(taskid string, parentType pb.RequestType, parentDocid uint32, docs []*pb.CrawlDoc) (error,int)
 
     /*
         抓取完成，标记成功失败等; 失败次数更新
@@ -18,6 +18,9 @@ type UrlDbItf interface {
     MarkCrawlFinishUrls(taskid string,docs []*pb.CrawlDoc)
     MarkCrawlFailUrls(taskid string, docs []*pb.CrawlDoc)
     ScanFreshUrls(taskid string,num int) (error,[]*pb.CrawlDoc)
+
+    // TODO. get all urls
+    ListUrls(task string, status int,lastTimeStamp int64) []string
 
     // TODO for task statistic
     //Statistic() *TaskStatistic

@@ -8,9 +8,8 @@ import (
 // should support multi goroutine
 type TaskItf interface {
     /*
-    用来描述Task， taskid贯穿始终
+    TaskName is TaskId
     */
-    TaskId() string
     GetJobDescription() *JobDescription
     /*
     发现下一级 新的连接
@@ -18,6 +17,8 @@ type TaskItf interface {
     第一级type默认是 pb.RequestType_WEB_StartUp
 
     通过requesttype和process中针对不同requesttype的处理，形成状态机
+
+    如何才能更方便的创建关联关系？？？？
     */
     Process(rtype pb.RequestType, doc *pb.CrawlDoc) []*pb.CrawlDoc
 }
