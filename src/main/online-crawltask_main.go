@@ -29,22 +29,6 @@ func main() {
     if h == nil {
         LOG.Fatalf("Can not get Crawl Handler TaskSchedulerHandler")
     }
-    schedulerHandler,ok := h.(*crawl.TaskSchedulerHandler)
-    if !ok {
-        LOG.Fatalf("Can translate to TaskSchedulerHandler")
-    }
-    schedulerHandler.RegisterTask(t)
-    ///////////////
-    //////////////
-    h = crawl.GetCrawlHandlerByName("TaskReceiverHandler")
-    if h == nil {
-        LOG.Fatalf("Can not get Crawl Handler TaskReceiverHandler")
-    }
-    receiverHandler,ok := h.(*crawl.TaskReceiverHandler)
-    if !ok {
-        LOG.Fatalf("Can translate to TaskReceiverHandler")
-    }
-    receiverHandler.RegisterTask(t)
     //////////////
 
     c := crawl.CrawlHandlerController{}

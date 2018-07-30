@@ -43,8 +43,10 @@ type CrawlerType struct {
 	// handler
 	ContentDbLevelDbFile *string
     UrlDbSQLiteFile *string
-    // task db scheduler
-    TaskDBScanNum *int
+    // task scheduler
+    SupportTasks *string
+    // taskprocess
+    ScanFreshEachNumber *int
 
 	// task
 	CrawlTaskName *string
@@ -85,6 +87,7 @@ var CrawlerConf = CrawlerType{
     CrawlTaskName: flag.String("crawl_task","","crawl task itf name"),
     ContentDbLevelDbFile :flag.String("contentdb_leveldb","db/contentdb","contentdb leveldb file path"),
     UrlDbSQLiteFile :flag.String("urldb_sqlite","db/urldb.db","urldb sqlite file"),
-    TaskDBScanNum:flag.Int("taskdb_scan_num",100,"task db scan number each time"),
+    ScanFreshEachNumber:flag.Int("scan_fresh_number",20,"each scan fresh url number"),
+    SupportTasks:flag.String("support_tasks","DummyTask","split by :"),
 
 }

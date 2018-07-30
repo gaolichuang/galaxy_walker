@@ -38,6 +38,10 @@ func IsInvalidUrl(_url string) bool {
     }
     return true
 }
+func IsCrawlSuccessByCode(t pb.ReturnType) bool {
+    // TODO. soft deadlink??
+    return t == pb.ReturnType_STATUS200 || t == pb.ReturnType_STATUS201
+}
 func IsCrawlSuccess(doc *pb.CrawlDoc) bool {
     // TODO. soft deadlink??
     t := doc.Code

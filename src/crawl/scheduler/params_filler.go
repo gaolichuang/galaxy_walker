@@ -13,7 +13,6 @@ import (
     "regexp"
     "strconv"
     "galaxy_walker/src/utils"
-    "galaxy_walker/src/task"
 )
 
 var CONF = conf.Conf
@@ -30,7 +29,7 @@ request type
 */
 
 
-var NormalJobD = task.JobDescription{
+var NormalJobD = pb.JobDescription{
     IsUrgent:        false,
     PrimeTag:        "n",
     RandomHostLoad:  0,
@@ -41,7 +40,7 @@ var NormalJobD = task.JobDescription{
     Follow_redirect: false,
 }
 
-var UrgentJobD = task.JobDescription{
+var UrgentJobD = pb.JobDescription{
     IsUrgent:       true,
     PrimeTag:       "U",
     RandomHostLoad: 0,
@@ -51,13 +50,13 @@ var UrgentJobD = task.JobDescription{
 
 type ParamFillerMaster struct {
     fillers ParamFillerGroup
-    jd      *task.JobDescription
+    jd      *pb.JobDescription
 }
 
 func (m *ParamFillerMaster) RegisterParamFillerGroup(f ParamFillerGroup) {
     m.fillers = f
 }
-func (m *ParamFillerMaster) RegisterJobDescription(jd *task.JobDescription) {
+func (m *ParamFillerMaster) RegisterJobDescription(jd *pb.JobDescription) {
     m.jd = jd
 }
 func (m *ParamFillerMaster) Init() {
@@ -99,7 +98,7 @@ func (d *DefaultParamFillerGroup) Package() {
 
 type ParamFiller interface {
     Init()
-    Fill(*task.JobDescription, *pb.CrawlDoc)
+    Fill(*pb.JobDescription, *pb.CrawlDoc)
 }
 
 // prepareParamFiller should the first one
@@ -108,7 +107,7 @@ type PrepareParamFiller struct {
 
 func (p *PrepareParamFiller) Init() {
 }
-func (p *PrepareParamFiller) Fill(jd *task.JobDescription, doc *pb.CrawlDoc) {
+func (p *PrepareParamFiller) Fill(jd *pb.JobDescription, doc *pb.CrawlDoc) {
     base.CHECK(doc.RequestUrl != "", "Doc Request url not filled")
     // normalize request_url, fill url,host,path ...
     if doc.GetCrawlParam() == nil {
@@ -145,7 +144,7 @@ func (f *FakeHostParamFiller) Init() {
     f.fakehost = make(map[string]string)
     f.loadFakeHostConfigFile()
 }
-func (f *FakeHostParamFiller) fill(jd *task.JobDescription, doc *pb.CrawlDoc) {
+func (f *FakeHostParamFiller) fill(jd *pb.JobDescription, doc *pb.CrawlDoc) {
     for k, v := range f.fakehost {
         r, _ := regexp.Compile(k)
         regexRet := r.FindAllString(doc.CrawlParam.FetchHint.Host, -1)
@@ -154,7 +153,7 @@ func (f *FakeHostParamFiller) fill(jd *task.JobDescription, doc *pb.CrawlDoc) {
         }
     }
 }
-func (f *FakeHostParamFiller) Fill(jd *task.JobDescription, doc *pb.CrawlDoc) {
+func (f *FakeHostParamFiller) Fill(jd *pb.JobDescription, doc *pb.CrawlDoc) {
     f.loadFakeHostConfigFile()
     f.fill(jd, doc)
 }
@@ -181,7 +180,7 @@ func (h *HostLoadParamFiller) Init() {
     h.hostload = make(map[string]int)
     h.loadHostloadConfigFile()
 }
-func (h *HostLoadParamFiller) fill(jd *task.JobDescription, doc *pb.CrawlDoc) {
+func (h *HostLoadParamFiller) fill(jd *pb.JobDescription, doc *pb.CrawlDoc) {
     host := utils.GetHostName(doc)
     hl := *CONF.Crawler.DefaultHostLoad
     thl, present := h.hostload[host]
@@ -190,7 +189,7 @@ func (h *HostLoadParamFiller) fill(jd *task.JobDescription, doc *pb.CrawlDoc) {
     }
     doc.CrawlParam.Hostload = int32(hl)
 }
-func (h *HostLoadParamFiller) Fill(jd *task.JobDescription, doc *pb.CrawlDoc) {
+func (h *HostLoadParamFiller) Fill(jd *pb.JobDescription, doc *pb.CrawlDoc) {
     h.loadHostloadConfigFile() // reload
     h.fill(jd, doc)
 }
@@ -217,7 +216,7 @@ func (f *MultiFetcherParamFiller) Init() {
     f.multifetcher = make(map[string]int)
     f.loadMultiFetcherConfigFile()
 }
-func (f *MultiFetcherParamFiller) fill(jd *task.JobDescription, doc *pb.CrawlDoc) {
+func (f *MultiFetcherParamFiller) fill(jd *pb.JobDescription, doc *pb.CrawlDoc) {
     host := utils.GetHostName(doc)
     mf := 1
     thl, present := f.multifetcher[host]
@@ -226,7 +225,7 @@ func (f *MultiFetcherParamFiller) fill(jd *task.JobDescription, doc *pb.CrawlDoc
     }
     doc.CrawlParam.FetcherCount = int32(mf)
 }
-func (f *MultiFetcherParamFiller) Fill(jd *task.JobDescription, doc *pb.CrawlDoc) {
+func (f *MultiFetcherParamFiller) Fill(jd *pb.JobDescription, doc *pb.CrawlDoc) {
     f.loadMultiFetcherConfigFile()
     f.fill(jd, doc)
 }
@@ -253,13 +252,13 @@ func (f *ReceiverParamFiller) Init() {
     f.receivers = make(map[string]*pb.ConnectionInfo)
     f.loadReceiverConfigFile()
 }
-func (f *ReceiverParamFiller) fill(jd *task.JobDescription, doc *pb.CrawlDoc) {
+func (f *ReceiverParamFiller) fill(jd *pb.JobDescription, doc *pb.CrawlDoc) {
     for _, v := range f.receivers {
         doc.CrawlParam.Receivers = append(doc.CrawlParam.Receivers, v)
     }
 }
 
-func (f *ReceiverParamFiller) Fill(jd *task.JobDescription, doc *pb.CrawlDoc) {
+func (f *ReceiverParamFiller) Fill(jd *pb.JobDescription, doc *pb.CrawlDoc) {
     f.loadReceiverConfigFile()
     f.fill(jd, doc)
 }
@@ -269,7 +268,7 @@ type TagParamFiller struct {
 
 func (h *TagParamFiller) Init() {
 }
-func (h *TagParamFiller) Fill(jd *task.JobDescription, doc *pb.CrawlDoc) {
+func (h *TagParamFiller) Fill(jd *pb.JobDescription, doc *pb.CrawlDoc) {
     doc.CrawlParam.Pri = pb.Priority_NORMAL
     if jd.IsUrgent {
         doc.CrawlParam.Pri = pb.Priority_URGENT
@@ -296,10 +295,10 @@ func (h *TagParamFiller) Fill(jd *task.JobDescription, doc *pb.CrawlDoc) {
     doc.CrawlParam.Nofollow = jd.NoFollow
 }
 
-func GetJobDescriptionFromFile(filename string) *task.JobDescription {
+func GetJobDescriptionFromFile(filename string) *pb.JobDescription {
     c, e := file.ReadFileToString(filename)
     base.CHECKERROR(e, "read file %s", filename)
-    var jd task.JobDescription
+    var jd pb.JobDescription
     e = json.Unmarshal([]byte(c), &jd)
     base.CHECKERROR(e, "UnMarshal Error From %s", filename)
     LOG.Infof("Load JobDescription from %s : %+v", filename, jd)

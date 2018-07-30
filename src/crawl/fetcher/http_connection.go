@@ -122,7 +122,7 @@ func (c *Connection) FetchOne(doc *pb.CrawlDoc, f func(*pb.CrawlDoc, *Connection
         c.Handle30X(resp, doc)
     } else if err == nil {
         doc.Code = pb.ReturnType(resp.StatusCode)
-        if utils.IsCrawlSuccess(pb.ReturnType(resp.StatusCode)) {
+        if utils.IsCrawlSuccessByCode(pb.ReturnType(resp.StatusCode)) {
             c.Handle200(resp, doc)
         } else {
             c.HandleOther(resp, nil, doc)

@@ -94,7 +94,7 @@ func (handler *DocHandler) extractLinkCallBack(i int, s *goquery.Selection) {
     }
 }
 func (handler *DocHandler) Accept(crawlDoc *proto.CrawlDoc) bool {
-    return utils.IsCrawlSuccess(crawlDoc.Code) && !crawlDoc.CrawlParam.NoExtractLink
+    return utils.IsCrawlSuccessByCode(crawlDoc.Code) && !crawlDoc.CrawlParam.NoExtractLink
 }
 func (handler *DocHandler) Process(crawlDoc *proto.CrawlDoc) {
     LOG.VLog(3).Debugf("[%s]Process One Doc %s ",

@@ -27,6 +27,8 @@ const (
     kWriteBatchSize  = 100
     kUrlTablePrefix  = "urldb_"
     kRetryMaxNum = 5
+    kScanFreshInterval = 300
+    kScanFailInterval = 600
 
     /*
                          +--------+
@@ -61,8 +63,8 @@ CREATE TABLE IF NOT EXISTS urldb_%s (
     kInsertIntoTaskTable            = `insert into urldb_%s (url,rtype,parentType,parentDocid,createTimeStamp,updateTimeStamp) values `
     kUpdateTaskStatus               = `update urldb_%s set status="%d",updateTimeStamp="%d" where url="%s"`
     kUpdateTaskStatusAndRetry       = `update urldb_%s set status="%d",updateTimeStamp="%d",retryNum="%d where url="%s"`
-    kSelectFromTaskByStatus         = `select url,rtype,parentType,parentDocid,status,createTimeStamp,updateTimeStamp,retryNum from urldb_%s where status=%d limit %d`
-    kSelectFromTaskByStatusAndRetry = `select url,rtype,parentType,parentDocid,status,createTimeStamp,updateTimeStamp,retryNum from urldb_%s where status=%d and retryNum<%d limit %d`
+    kSelectFromTaskByStatus         = `select url,rtype,parentType,parentDocid,status,createTimeStamp,updateTimeStamp,retryNum from urldb_%s where status=%d and updateTimeStamp<%d limit %d`
+    kSelectFromTaskByStatusAndRetry = `select url,rtype,parentType,parentDocid,status,createTimeStamp,updateTimeStamp,retryNum from urldb_%s where status=%d and updateTimeStamp<%d and retryNum<%d limit %d`
     kSelectFromTaskByUrl = `select url from urldb_%s where %s`
     kSelectAllFromTaskByUrl = `select url from urldb_%s `
 )
@@ -337,19 +339,20 @@ func (u *UrlDBBySQLite) ScanFreshUrls(task string, num int) (error,[]*pb.CrawlDo
     /*
     1.已发现未抓取的url
     2.抓取失败，仍在重试范围内的url
+    3.超时的url
     */
     t1 := time_util.GetTimeInMs()
+    now := time_util.GetCurrentTimeStamp()
     // fresh
-    err,docs,urls := u.scanFreshAndUpdateStatus(task,num)
+    err,docs,urls := u.scanFreshAndUpdateStatus(task,int(now)-kScanFreshInterval,num)
     if err != nil{
         return err,nil
     }
-    now := time_util.GetCurrentTimeStamp()
     for _,url := range urls {
         execSQL(u.dbname, fmt.Sprintf(kUpdateTaskStatus, KUrlStatusDoing, now, url))
     }
     // fail
-    err,fdocs,furls := u.scanFailAndUpdateStatus(task,num,kRetryMaxNum)
+    err,fdocs,furls := u.scanFailAndUpdateStatus(task,num/2,int(now)-kScanFailInterval,kRetryMaxNum)
     if err == nil {
         docs = append(docs,fdocs...)
         for _,url := range furls {
@@ -359,7 +362,7 @@ func (u *UrlDBBySQLite) ScanFreshUrls(task string, num int) (error,[]*pb.CrawlDo
     LOG.VLog(3).DebugTag("UrlDBBySQLite","scan %d,%d urls from %s use %d ms",len(docs),len(fdocs),task,time_util.GetTimeInMs()-t1)
     return nil,docs
 }
-func (u *UrlDBBySQLite) scanFreshAndUpdateStatus(task string, num int) (error,[]*pb.CrawlDoc,[]string) {
+func (u *UrlDBBySQLite) scanFreshAndUpdateStatus(task string,updatetime int, num int) (error,[]*pb.CrawlDoc,[]string) {
     dbname := u.dbname
     db, err := sql.Open(kDriverName, dbname)
     if err != nil {
@@ -369,7 +372,7 @@ func (u *UrlDBBySQLite) scanFreshAndUpdateStatus(task string, num int) (error,[]
     defer db.Close()
     t1 := time_util.GetTimeInMs()
     //kSelectFromTaskByStatus= `select url,parentType,parentDocid,status,createTimeStamp,updateTimeStamp,retryNum from urldb_%s where status="%d"`
-    sqlsmt := fmt.Sprintf(kSelectFromTaskByStatus,task,KUrlStatusFail,num)
+    sqlsmt := fmt.Sprintf(kSelectFromTaskByStatus,task,KUrlStatusUndo,updatetime,num)
     rows, err := db.Query(sqlsmt)
     if err != nil {
         LOG.Errorf("SQL %s Err %v from %s", sqlsmt, err, dbname)
@@ -403,7 +406,7 @@ func (u *UrlDBBySQLite) scanFreshAndUpdateStatus(task string, num int) (error,[]
     LOG.VLog(4).DebugTag("SQL", "%d record read use %d ms by %s from %s", len(ret), time_util.GetTimeInMs() - t1, sqlsmt, dbname)
     return nil, ret,urls
 }
-func (u *UrlDBBySQLite) scanFailAndUpdateStatus(task string, num int,retry int) (error,[]*pb.CrawlDoc,[]string) {
+func (u *UrlDBBySQLite) scanFailAndUpdateStatus(task string, num,updatetime int,retry int) (error,[]*pb.CrawlDoc,[]string) {
     dbname := u.dbname
     db, err := sql.Open(kDriverName, dbname)
     if err != nil {
@@ -413,7 +416,7 @@ func (u *UrlDBBySQLite) scanFailAndUpdateStatus(task string, num int,retry int) 
     defer db.Close()
     t1 := time_util.GetTimeInMs()
     //kSelectFromTaskByStatus= `select url,parentType,parentDocid,status,createTimeStamp,updateTimeStamp,retryNum from urldb_%s where status="%d"`
-    sqlsmt := fmt.Sprintf(kSelectFromTaskByStatusAndRetry,task,KUrlStatusFail,retry,num)
+    sqlsmt := fmt.Sprintf(kSelectFromTaskByStatusAndRetry,task,KUrlStatusFail,updatetime,retry,num)
     rows, err := db.Query(sqlsmt)
     if err != nil {
         LOG.Errorf("SQL %s Err %v from %s", sqlsmt, err, dbname)

@@ -8,10 +8,6 @@ import (
 // should support multi goroutine
 type TaskItf interface {
     /*
-    TaskName is TaskId
-    */
-    GetJobDescription() *JobDescription
-    /*
     发现下一级 新的连接
     需要标记下级的 requesttype
     第一级type默认是 pb.RequestType_WEB_StartUp

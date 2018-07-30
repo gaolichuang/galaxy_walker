@@ -11,7 +11,7 @@ type DummyTask struct {
 func (d *DummyTask)TaskId() string {
     return "dummy"
 }
-func (d *DummyTask)GetJobDescription() *JobDescription {
+func (d *DummyTask)GetJobDescription() *pb.JobDescription {
     return nil
 }
 func (d *DummyTask)Process(rtype pb.RequestType, doc *pb.CrawlDoc) []*pb.CrawlDoc {
