@@ -4,8 +4,10 @@ package crawl
 import (
     LOG "galaxy_walker/internal/gcodebase/log"
     "galaxy_walker/src/task"
-    "time"
     "strings"
+    "galaxy_walker/src/crawl/scheduler"
+    "time"
+    pb "galaxy_walker/src/proto"
 )
 /*
 
@@ -24,6 +26,7 @@ import (
 type TaskSchedulerHandler struct {
     CrawlHandler
     taskProcessors []*task.TaskProcessor
+    paramsFiller *scheduler.ParamFillerMaster
 }
 func (h *TaskSchedulerHandler) register(taskname string) {
     tp := task.NewTaskProcessor()
@@ -40,19 +43,25 @@ func (h *TaskSchedulerHandler) Init() bool {
     for _,t := range strings.Split(*CONF.Crawler.SupportTasks,":") {
         h.register(t)
     }
+    h.paramsFiller = &scheduler.ParamFillerMaster{}
+    h.paramsFiller.RegisterParamFillerGroup(&scheduler.DefaultParamFillerGroup{})
+    h.paramsFiller.Init()
     return true
 }
 func (h *TaskSchedulerHandler) Run(p CrawlProcessor) {
     for {
-        time.Sleep(time.Second)
         if len(h.output_chan) > 0 {
-            continue
+            time.Sleep(time.Second)
         }
         for _,t := range h.taskProcessors {
             for _,doc := range t.DoFresh() {
+                h.paramsFiller.RegisterJobDescription(t.GetJobDescription())
+                h.paramsFiller.Fill(doc)
                 h.Output(doc)
+                LOG.VLog(3).DebugTag("XXXXX","TaskSchedulerHandler, output doc\n%s",pb.FromProtoToString(doc))
             }
         }
+        time.Sleep(time.Second*(time.Duration(*CONF.Crawler.SchedulerFreshIntervalInSec)))
     }
 }
 

@@ -120,6 +120,7 @@ message CrawlRecord {
 }
 
 message CrawlParam {
+    // fill by task description
     Priority pri = 1;
     int32 hostload = 2;
     int32 random_hostload = 3;
@@ -137,6 +138,10 @@ message CrawlParam {
     bool use_proxy = 22;
     bool follow_redirect = 23;
 
+    string primary_tag = 33;
+    repeated string secondary_tag = 34;
+
+    // fill by urldb
     string taskid = 100;
     RequestType rtype = 101;
     // record crawl level.
@@ -147,8 +152,7 @@ message CrawlParam {
     // url fresh found timestamp in second.
     int64 discover_time = 105;
 
-    string primary_tag = 202;
-    repeated string secondary_tag = 203;
+
 }
 
 // for follow redirect.

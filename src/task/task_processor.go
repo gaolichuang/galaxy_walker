@@ -10,7 +10,9 @@ import (
     "fmt"
     "galaxy_walker/internal/gcodebase/conf"
     "galaxy_walker/src/utils"
+    "galaxy_walker/internal/gcodebase/time_util"
 )
+
 var CONF = conf.Conf
 const (
     kBloomSize = 10000
@@ -44,7 +46,14 @@ func (t *TaskProcessor)Init(task string) error {
 
     t.taskDes = t.taskDbItf.Get(task)
     if t.taskDes == nil {
-        return fmt.Errorf("%s not init to db",task)
+        // init it
+        t.taskDes = &pb.TaskDescription{
+            Name:task,
+            Status:pb.KTaskStatusOnline,
+            CreateAt:int(time_util.GetCurrentTimeStamp()),
+            Desc:t.taskItf.GetJobDescription(),
+        }
+        t.taskDbItf.Put(t.taskDes)
     }
     t.taskName = t.taskDes.Name
     //  init bf
@@ -58,6 +67,9 @@ func (t *TaskProcessor)Init(task string) error {
     LOG.VLog(2).DebugTag("TaskProcessor","%s load %d url in bf",t.taskName,num)
     return nil
 }
+func (t *TaskProcessor)GetJobDescription() *pb.JobDescription {
+    return t.taskDes.Desc
+}
 func (t *TaskProcessor)DoFresh() []*pb.CrawlDoc{
     /*
     如果初始每调用，则调用初始状态的taskItf.Process
@@ -70,7 +82,7 @@ func (t *TaskProcessor)DoFresh() []*pb.CrawlDoc{
             LOG.Errorf("Set StartUp FreshUrls Error,%v,%v",err,docs)
             return nil
         }
-        LOG.VLog(2).DebugTag("TaskProcess","StartUp Urls Set %d num",num)
+        LOG.VLog(2).DebugTag("TaskProcess","StartUp Urls Set %d num,docs:%v",num,docs)
         t.taskDbItf.Update(t.taskName,pb.KTaskStatusStarting,nil)
     }
     err,docs := t.urlDbItf.ScanFreshUrls(t.taskName,*CONF.Crawler.ScanFreshEachNumber)
@@ -103,7 +115,7 @@ func (t *TaskProcessor)DoFinish(doc *pb.CrawlDoc) {
         LOG.Errorf("TaskProcessor %s SetFreshUrls err %v",t.taskName,err)
         return
     }
-    LOG.VLog(3).DebugTag("TaskProcessor","%s SetFreshUrls %d nums",num)
+    LOG.VLog(3).DebugTag("TaskProcessor","%s SetFreshUrls %d nums",t.taskName,num)
     t.urlDbItf.MarkCrawlFinishUrls(t.taskName,[]*pb.CrawlDoc{doc})
 }
 

@@ -45,11 +45,13 @@ type CrawlerType struct {
     UrlDbSQLiteFile *string
     // task scheduler
     SupportTasks *string
+    SchedulerFreshIntervalInSec *int
     // taskprocess
     ScanFreshEachNumber *int
 
 	// task
 	CrawlTaskName *string
+    TaskDbSQLiteFile *string
 }
 
 var CrawlerConf = CrawlerType{
@@ -89,5 +91,7 @@ var CrawlerConf = CrawlerType{
     UrlDbSQLiteFile :flag.String("urldb_sqlite","db/urldb.db","urldb sqlite file"),
     ScanFreshEachNumber:flag.Int("scan_fresh_number",20,"each scan fresh url number"),
     SupportTasks:flag.String("support_tasks","DummyTask","split by :"),
+    TaskDbSQLiteFile :flag.String("taskdb_sqlite","db/task.db","task db sqlite file"),
+    SchedulerFreshIntervalInSec:flag.Int("schedule_fresh_interval_insec",30,"task scheduler handler scan fresh interval in second"),
 
 }

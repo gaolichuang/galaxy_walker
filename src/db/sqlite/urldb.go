@@ -9,7 +9,8 @@ import (
     "galaxy_walker/internal/gcodebase/conf"
     "strings"
     "fmt"
-    "gcodebase/file"
+    "galaxy_walker/internal/gcodebase/file"
+    "path/filepath"
 )
 
 var CONF = conf.Conf
@@ -114,9 +115,6 @@ func execSQL(dbfile, smt string) (error, int) {
     }
     LOG.VLog(2).DebugTag("SQLRECORD", smt)
     num, _ := r.RowsAffected()
-    if num == 0 {
-        LOG.VLog(4).DebugTag("XXXXXX", "%s exec affect 0 record.", smt)
-    }
     return nil, int(num)
 }
 
@@ -127,13 +125,19 @@ type UrlDBBySQLite struct {
 }
 
 func NewUrlDbBySQLite() *UrlDBBySQLite {
-    dbname := file.GetConfFile(*CONF.Crawler.UrlDbSQLiteFile)
+    dbfile := filepath.Join(*CONF.ConfPathPrefix, *CONF.Crawler.UrlDbSQLiteFile)
+    if !file.Exist(dbfile) {
+        err := file.WriteStringToFile([]byte(""),dbfile)
+        if err != nil {
+            LOG.Fatalf("Touch UrlDB Err:%v, use %s", err, dbfile)
+        }
+    }
     tables := make(map[string]bool)
-    for _, t := range ListTable(dbname, kUrlTablePrefix) {
+    for _, t := range ListTable(dbfile, kUrlTablePrefix) {
         tables[t] = true
     }
     u := &UrlDBBySQLite{
-        dbname: dbname,
+        dbname: dbfile,
         tables: tables,
     }
     return u
@@ -150,6 +154,7 @@ func (u *UrlDBBySQLite) createTaskTableIfNotExist(task string) {
     u.tables = tables
 }
 func (u *UrlDBBySQLite) ListUrls(task string,status int,lastTimeStamp int64) []string {
+    u.createTaskTableIfNotExist(task)
     // status == -1, lasttimestamp <=0 will list all urls for task
     listUrls := func(sqlsmt string) []string {
         dbname := u.dbname
@@ -206,7 +211,10 @@ func (u *UrlDBBySQLite) listUrlsByWhiteList(task string, urls[]string) []string 
         for _,url := range urls {
             record = append(record,fmt.Sprintf(" url=\"%s\" ",url))
         }
-        sqlsmt := fmt.Sprintf(kSelectFromTaskByUrl,task,strings.Join(record, "or"))
+        sqlsmt := fmt.Sprintf(kSelectAllFromTaskByUrl,task)
+        if len(record) > 0 {
+            sqlsmt = fmt.Sprintf(kSelectFromTaskByUrl, task, strings.Join(record, "or"))
+        }
         rows, err := db.Query(sqlsmt)
         if err != nil {
             LOG.Errorf("SQL %s Err %v from %s", sqlsmt, err, dbname)
@@ -228,6 +236,7 @@ func (u *UrlDBBySQLite) listUrlsByWhiteList(task string, urls[]string) []string 
 
     }
 
+    if len(urls) <= 0 {return []string{}}
     ret := make([]string,0)
     times := len(urls)/kWriteBatchSize
     for i:=0;i<times;i++ {
@@ -273,7 +282,7 @@ func (u *UrlDBBySQLite) SetFreshUrls(task string, parentType pb.RequestType, par
         if doc.CrawlParam != nil {rtype = int(doc.CrawlParam.Rtype)}
         record = append(record,
             fmt.Sprintf(`("%s","%d","%d","%d","%d",%d)`,
-                doc.Url,rtype, parentType, parentDocid, now, now))
+                doc.RequestUrl,rtype, parentType, parentDocid, now, 0))
         if len(record) > kWriteBatchSize {
             sqlsmt := fmt.Sprintf("%s %s", insertSmt, strings.Join(record, ","))
             r, err := db.Exec(sqlsmt)
@@ -317,7 +326,7 @@ func (u *UrlDBBySQLite) MarkCrawlFinishUrls(taskid string, docs []*pb.CrawlDoc) 
         if param == nil {
             continue
         }
-        execSQL(u.dbname, fmt.Sprintf(kUpdateTaskStatusAndRetry, KUrlStatusDone, now, param.RetryNumber, doc.RequestUrl))
+        execSQL(u.dbname, fmt.Sprintf(kUpdateTaskStatusAndRetry,taskid, KUrlStatusDone, now, param.RetryNumber, doc.RequestUrl))
     }
 }
 func (u *UrlDBBySQLite) MarkCrawlFailUrls(taskid string, docs []*pb.CrawlDoc) {
@@ -331,7 +340,7 @@ func (u *UrlDBBySQLite) MarkCrawlFailUrls(taskid string, docs []*pb.CrawlDoc) {
         if param == nil {
             continue
         }
-        execSQL(u.dbname, fmt.Sprintf(kUpdateTaskStatusAndRetry, KUrlStatusFail, now, param.RetryNumber+1, doc.RequestUrl))
+        execSQL(u.dbname, fmt.Sprintf(kUpdateTaskStatusAndRetry, taskid,KUrlStatusFail, now, param.RetryNumber+1, doc.RequestUrl))
     }
 }
 
@@ -349,14 +358,19 @@ func (u *UrlDBBySQLite) ScanFreshUrls(task string, num int) (error,[]*pb.CrawlDo
         return err,nil
     }
     for _,url := range urls {
-        execSQL(u.dbname, fmt.Sprintf(kUpdateTaskStatus, KUrlStatusDoing, now, url))
+        execSQL(u.dbname, fmt.Sprintf(kUpdateTaskStatus,task, KUrlStatusDoing, now, url))
     }
     // fail
     err,fdocs,furls := u.scanFailAndUpdateStatus(task,num/2,int(now)-kScanFailInterval,kRetryMaxNum)
     if err == nil {
         docs = append(docs,fdocs...)
         for _,url := range furls {
-            execSQL(u.dbname, fmt.Sprintf(kUpdateTaskStatus, KUrlStatusDoing, now, url))
+            execSQL(u.dbname, fmt.Sprintf(kUpdateTaskStatus,task, KUrlStatusDoing, now, url))
+        }
+    }
+    if *CONF.LogV >=5 {
+        for _,doc := range docs {
+            LOG.VLog(5).DebugTag("UrlDBBySQLite","ScanFreshUrls url %s,rtype:%s",doc.RequestUrl,pb.RequestTypeToString(doc.CrawlParam.Rtype))
         }
     }
     LOG.VLog(3).DebugTag("UrlDBBySQLite","scan %d,%d urls from %s use %d ms",len(docs),len(fdocs),task,time_util.GetTimeInMs()-t1)

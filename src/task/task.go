@@ -16,6 +16,8 @@ type TaskItf interface {
 
     如何才能更方便的创建关联关系？？？？
     */
+    // use for init task description. if not exist in db, create
+    GetJobDescription() *pb.JobDescription
     Process(rtype pb.RequestType, doc *pb.CrawlDoc) []*pb.CrawlDoc
 }
 
