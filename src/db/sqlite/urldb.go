@@ -53,8 +53,9 @@ const (
 CREATE TABLE IF NOT EXISTS urldb_%s (
     url VARCHAR(255) PRIMARY KEY,
     rtype int,
+    docid INTEGER default 0,
     parentType int,
-    parentDocid int,
+    parentDocid INTEGER,
     status int default 0,
     createTimeStamp int,
     updateTimeStamp int,
@@ -62,8 +63,8 @@ CREATE TABLE IF NOT EXISTS urldb_%s (
 );`
     kListTable                      = `select name from sqlite_master where type = 'table';`
     kInsertIntoTaskTable            = `insert into urldb_%s (url,rtype,parentType,parentDocid,createTimeStamp,updateTimeStamp) values `
-    kUpdateTaskStatus               = `update urldb_%s set status="%d",updateTimeStamp="%d" where url="%s"`
-    kUpdateTaskStatusAndRetry       = `update urldb_%s set status="%d",updateTimeStamp="%d",retryNum="%d where url="%s"`
+    kUpdateTaskStatus               = `update urldb_%s set status="%d",updateTimeStamp="%d" where url='%s'`
+    kUpdateTaskStatusAndRetry       = `update urldb_%s set status="%d",docid="%d",updateTimeStamp="%d",retryNum="%d" where url='%s'`
     kSelectFromTaskByStatus         = `select url,rtype,parentType,parentDocid,status,createTimeStamp,updateTimeStamp,retryNum from urldb_%s where status=%d and updateTimeStamp<%d limit %d`
     kSelectFromTaskByStatusAndRetry = `select url,rtype,parentType,parentDocid,status,createTimeStamp,updateTimeStamp,retryNum from urldb_%s where status=%d and updateTimeStamp<%d and retryNum<%d limit %d`
     kSelectFromTaskByUrl = `select url from urldb_%s where %s`
@@ -281,7 +282,7 @@ func (u *UrlDBBySQLite) SetFreshUrls(task string, parentType pb.RequestType, par
         rtype := 0
         if doc.CrawlParam != nil {rtype = int(doc.CrawlParam.Rtype)}
         record = append(record,
-            fmt.Sprintf(`("%s","%d","%d","%d","%d",%d)`,
+            fmt.Sprintf(`('%s',"%d","%d","%d","%d",%d)`,
                 doc.RequestUrl,rtype, parentType, parentDocid, now, 0))
         if len(record) > kWriteBatchSize {
             sqlsmt := fmt.Sprintf("%s %s", insertSmt, strings.Join(record, ","))
@@ -294,14 +295,14 @@ func (u *UrlDBBySQLite) SetFreshUrls(task string, parentType pb.RequestType, par
             num, _ := r.RowsAffected()
             affectNum += num
             LOG.VLog(3).DebugTag("SQLRECORD", sqlsmt)
-            LOG.VLog(5).DebugTag("SQL", "Insert %s records into %s ", num, task)
+            LOG.VLog(5).DebugTag("SQL", "Insert %d records into %s ", num, task)
         }
     }
     if len(record) > 0 {
         sqlsmt := fmt.Sprintf("%s %s", insertSmt, strings.Join(record, ","))
         r, err := db.Exec(sqlsmt)
         if err != nil {
-            LOG.Errorf("Inset SQL Err %v", err)
+            LOG.Errorf("Inset SQL Err %v, %s", err,sqlsmt)
         } else {
             record = nil
             num, _ := r.RowsAffected()
@@ -326,7 +327,7 @@ func (u *UrlDBBySQLite) MarkCrawlFinishUrls(taskid string, docs []*pb.CrawlDoc) 
         if param == nil {
             continue
         }
-        execSQL(u.dbname, fmt.Sprintf(kUpdateTaskStatusAndRetry,taskid, KUrlStatusDone, now, param.RetryNumber, doc.RequestUrl))
+        execSQL(u.dbname, fmt.Sprintf(kUpdateTaskStatusAndRetry,taskid, KUrlStatusDone,doc.Docid, now, param.RetryNumber, doc.RequestUrl))
     }
 }
 func (u *UrlDBBySQLite) MarkCrawlFailUrls(taskid string, docs []*pb.CrawlDoc) {
@@ -340,7 +341,7 @@ func (u *UrlDBBySQLite) MarkCrawlFailUrls(taskid string, docs []*pb.CrawlDoc) {
         if param == nil {
             continue
         }
-        execSQL(u.dbname, fmt.Sprintf(kUpdateTaskStatusAndRetry, taskid,KUrlStatusFail, now, param.RetryNumber+1, doc.RequestUrl))
+        execSQL(u.dbname, fmt.Sprintf(kUpdateTaskStatusAndRetry, taskid,KUrlStatusFail,doc.Docid, now, param.RetryNumber+1, doc.RequestUrl))
     }
 }
 
@@ -397,7 +398,8 @@ func (u *UrlDBBySQLite) scanFreshAndUpdateStatus(task string,updatetime int, num
     urls := make([]string,0)
     for rows.Next() {
         var url string
-        var rtype,parentType,parentDocid,status,createTimeStamp,updateTimeStamp,retrynum int
+        var parentDocid uint32
+        var rtype,parentType,status,createTimeStamp,updateTimeStamp,retrynum int
         err = rows.Scan(&url,&rtype,&parentType,&parentDocid,&status,&createTimeStamp,&updateTimeStamp,&retrynum)
         if err != nil {
             LOG.Errorf("SQL Err %v", err)
@@ -410,7 +412,7 @@ func (u *UrlDBBySQLite) scanFreshAndUpdateStatus(task string,updatetime int, num
         doc.CrawlParam = &pb.CrawlParam{
             Taskid:task,
             Rtype:pb.RequestType(rtype),
-            ParentDocid:int32(parentDocid),
+            ParentDocid:parentDocid,
             ParentRtype:pb.RequestType(parentType),
             RetryNumber:0,
             DiscoverTime:int64(createTimeStamp),
@@ -441,7 +443,8 @@ func (u *UrlDBBySQLite) scanFailAndUpdateStatus(task string, num,updatetime int,
     urls := make([]string,0)
     for rows.Next() {
         var url string
-        var rtype,parentType,parentDocid,status,createTimeStamp,updateTimeStamp,retrynum int
+        var parentDocid uint32
+        var rtype,parentType,status,createTimeStamp,updateTimeStamp,retrynum int
         err = rows.Scan(&url,&rtype,&parentType,&parentDocid,&status,&createTimeStamp,&updateTimeStamp,&retrynum)
         if err != nil {
             LOG.Errorf("SQL Err %v", err)
@@ -454,7 +457,7 @@ func (u *UrlDBBySQLite) scanFailAndUpdateStatus(task string, num,updatetime int,
         doc.CrawlParam = &pb.CrawlParam{
             Taskid:task,
             Rtype:pb.RequestType(rtype),
-            ParentDocid:int32(parentDocid),
+            ParentDocid:parentDocid,
             ParentRtype:pb.RequestType(parentType),
             RetryNumber:int32(retrynum),
             DiscoverTime:int64(createTimeStamp),

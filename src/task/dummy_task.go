@@ -33,8 +33,23 @@ func (d *DummyTask)Process(rtype pb.RequestType, doc *pb.CrawlDoc) []*pb.CrawlDo
     case pb.RequestType_WEB_MAIN:
         // startup docs. parse and return web hub. mark RequestType.
         LOG.VLog(2).DebugTag("XXXXXX","RequestType_WEB_MAIN %s",pb.FromProtoToString(doc))
+        docs := make([]*pb.CrawlDoc,0)
+        for _,link := range doc.IndomainOutlinks {
+            docs = append(docs,&pb.CrawlDoc{
+                RequestUrl:link.Url,
+                CrawlParam:&pb.CrawlParam{
+                    Rtype:pb.RequestType_WEB_CONTENT, // next level
+                },
+            })
+            if len(docs)>3 {
+                break
+            }
+            LOG.VLog(2).DebugTag("XXXXXX","RequestType_WEB_MAIN set FreshDoc %s",link.Url)
+        }
+        return docs
     case pb.RequestType_WEB_HUB:
     case pb.RequestType_WEB_CONTENT:
+        LOG.VLog(2).DebugTag("XXXXXX","RequestType_WEB_CONTENT %s",pb.FromProtoToString(doc))
     case pb.RequestType_WEB_DETAIL:
     default:
     }

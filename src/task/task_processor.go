@@ -77,12 +77,20 @@ func (t *TaskProcessor)DoFresh() []*pb.CrawlDoc{
     */
     if pb.IsFreshTask(t.taskDes) {
         docs := t.taskItf.Process(pb.RequestType_WEB_StartUp,nil)
-        err,num := t.urlDbItf.SetFreshUrls(t.taskName,pb.RequestType_WEB_StartUp,0,docs)
+        freshDocs := make([]*pb.CrawlDoc,0)
+        //derepeat.
+        for _,doc := range docs {
+            if !t.bf.TestAndAddString(genBloomKey(t.taskName,doc.RequestUrl)) {
+                freshDocs = append(freshDocs,doc)
+                LOG.VLog(4).DebugTag("DoFinish","fresh url %s",doc.RequestUrl)
+            }
+        }
+        err,num := t.urlDbItf.SetFreshUrls(t.taskName,pb.RequestType_WEB_StartUp,0,freshDocs)
         if err != nil {
-            LOG.Errorf("Set StartUp FreshUrls Error,%v,%v",err,docs)
+            LOG.Errorf("Set StartUp FreshUrls Error,%v,%v",err,freshDocs)
             return nil
         }
-        LOG.VLog(2).DebugTag("TaskProcess","StartUp Urls Set %d num,docs:%v",num,docs)
+        LOG.VLog(3).DebugTag("TaskProcess","StartUp Urls Set %d num,docs:%v",num,freshDocs)
         t.taskDbItf.Update(t.taskName,pb.KTaskStatusStarting,nil)
     }
     err,docs := t.urlDbItf.ScanFreshUrls(t.taskName,*CONF.Crawler.ScanFreshEachNumber)
@@ -106,8 +114,9 @@ func (t *TaskProcessor)DoFinish(doc *pb.CrawlDoc) {
     freshDocs := make([]*pb.CrawlDoc,0)
     //derepeat.
     for _,doc := range docs {
-        if !t.bf.TestAndAddString(genBloomKey(t.taskName,doc.Url)) {
+        if !t.bf.TestAndAddString(genBloomKey(t.taskName,doc.RequestUrl)) {
             freshDocs = append(freshDocs,doc)
+            LOG.VLog(4).DebugTag("DoFinish","fresh url %s",doc.RequestUrl)
         }
     }
     err,num := t.urlDbItf.SetFreshUrls(t.taskName,doc.CrawlParam.Rtype,doc.Docid,freshDocs)

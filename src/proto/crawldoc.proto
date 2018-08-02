@@ -89,7 +89,6 @@ enum Priority {
     URGENT = 1;
 }
 
-
 message ConnectionInfo {
     string host = 1;
     int32 port = 2;
@@ -115,8 +114,6 @@ message CrawlRecord {
     // time the doc fetched
     int64 fetch_time = 3;
     int64 fetch_use_inms = 4;
-
-
 }
 
 message CrawlParam {
@@ -145,14 +142,12 @@ message CrawlParam {
     string taskid = 100;
     RequestType rtype = 101;
     // record crawl level.
-    int32 parent_docid = 102;
+    uint32 parent_docid = 102;
     RequestType parent_rtype = 103;
     // crawl fail retry number.
     int32 retry_number = 104;
     // url fresh found timestamp in second.
     int64 discover_time = 105;
-
-
 }
 
 // for follow redirect.
