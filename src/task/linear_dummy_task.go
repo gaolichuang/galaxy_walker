@@ -13,7 +13,7 @@ func (d *LinearDummyTask)Init() error {
     d.RegisterRequestTypeCallBack(pb.RequestType_WEB_StartUp,pb.RequestType_WEB_MAIN,d.startUpCallBack)
     d.RegisterRequestTypeCallBack(pb.RequestType_WEB_MAIN,pb.RequestType_WEB_CONTENT,d.webmainCallBack)
     d.RegisterRequestTypeCallBack(pb.RequestType_WEB_CONTENT,pb.RequestType_WEB_End,d.webcontentCallBack)
-    return nil
+    return d.CheckIsLinearTopology()
 }
 func (d *LinearDummyTask) GetJobDescription() *pb.JobDescription {
     return &scheduler.NormalJobD

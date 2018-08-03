@@ -5,6 +5,7 @@ import (
     LOG "galaxy_walker/internal/gcodebase/log"
     "runtime"
     "reflect"
+    "fmt"
 )
 /*
 
@@ -32,7 +33,36 @@ func (l *LinearTask)RegisterRequestTypeCallBack(current,next pb.RequestType,fn T
         l.rtypeCallBack[current] = make([]taskChain,0)
     }
     l.rtypeCallBack[current]=append(l.rtypeCallBack[current],taskChain{current,next,fn,runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()})
-    // TODO. check circle. check all node can connect from zero.
+}
+func (l *LinearTask)CheckIsLinearTopology() error {
+    /*
+    TODO
+    1.必须有startup
+    2.是全联通图
+    3.不能有环
+    */
+    if _,ok := l.rtypeCallBack[pb.RequestType_WEB_StartUp];!ok {
+        return fmt.Errorf("Not exist RequestType_WEB_StartUp Node")
+    }
+    visit := make(map[pb.RequestType]bool)
+    queue := make([]pb.RequestType,0)
+    visit[pb.RequestType_WEB_StartUp]=true
+    queue = append(queue,pb.RequestType_WEB_StartUp)
+    for len(queue) > 0 {
+        top := queue[0]
+        for _,n := range l.rtypeCallBack[top] {
+            queue = append(queue,n.next)
+            if _,ok := visit[n.next];ok {
+                return fmt.Errorf("Exist Circle %s",pb.RequestTypeToString(n.next))
+            }
+            visit[n.next]=true
+        }
+        queue = queue[:len(queue)-1]
+    }
+    if len(visit)!=len(l.rtypeCallBack) {
+        return fmt.Errorf("not one island")
+    }
+    return nil
 }
 
 func (l *LinearTask)Process(rtype pb.RequestType, doc *pb.CrawlDoc) []*pb.CrawlDoc {
