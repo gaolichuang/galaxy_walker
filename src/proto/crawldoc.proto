@@ -82,6 +82,7 @@ enum RequestType {
     WEB_CONTENT = 4;
     WEB_SUBCONTENT = 5;
     WEB_DETAIL = 6;
+    WEB_End = 10;
 }
 
 enum Priority {

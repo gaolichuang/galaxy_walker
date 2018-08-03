@@ -19,6 +19,7 @@ type TaskItf interface {
     // use for init task description. if not exist in db, create
     GetJobDescription() *pb.JobDescription
     Process(rtype pb.RequestType, doc *pb.CrawlDoc) []*pb.CrawlDoc
+    Init()  error
 }
 
 

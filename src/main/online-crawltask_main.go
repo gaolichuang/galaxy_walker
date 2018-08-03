@@ -24,6 +24,7 @@ func main() {
     if t == nil {
         LOG.Fatalf("Can not get Crawl Handler %s", *CONF.Crawler.CrawlTaskName)
     }
+    t.Init()
     //////////////
     h := crawl.GetCrawlHandlerByName("TaskSchedulerHandler")
     if h == nil {

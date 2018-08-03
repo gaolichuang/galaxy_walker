@@ -10,6 +10,9 @@ type DummyTask struct {
 
 }
 
+func (d *DummyTask) Init() error {
+    return nil
+}
 func (d *DummyTask) GetJobDescription() *pb.JobDescription {
     return &scheduler.NormalJobD
 }

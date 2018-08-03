@@ -41,6 +41,9 @@ func (t *TaskProcessor)Init(task string) error {
     if t.taskItf == nil {
         return fmt.Errorf("%s not valid TaskItf",task)
     }
+    if err:= t.taskItf.Init();err != nil {
+        return fmt.Errorf("TaskItf %s init err %v",task,err)
+    }
     t.urlDbItf = db.NewUrlDbItf()
     t.taskDbItf = db.NewTaskItf()
 
