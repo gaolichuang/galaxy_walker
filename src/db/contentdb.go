@@ -29,7 +29,6 @@ type ContentDBItf interface {
     // for statistic.
     ScanKey(task string) []string
 
-
     // delete batch by docid.
     DeleteBatch(task string, docids []uint32) (error,int)
     // delete all

@@ -94,7 +94,7 @@ func (t *TaskProcessor)DoFresh() []*pb.CrawlDoc{
             return nil
         }
         LOG.VLog(3).DebugTag("TaskProcess","StartUp Urls Set %d num,docs:%v",num,freshDocs)
-        t.taskDbItf.Update(t.taskName,pb.KTaskStatusStarting,nil)
+        t.taskDbItf.Update(t.taskName,-1,pb.KTaskStatusStarting,nil)
     }
     err,docs := t.urlDbItf.ScanFreshUrls(t.taskName,*CONF.Crawler.ScanFreshEachNumber)
     if err != nil {

@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS task (
     kUpdateTaskSQL = `update task set %s where name="%s"`
     kSelectTaskByNameSQL = `select name,status,createTimeStamp,expireTimeStamp,desc from task where name="%s"`
     kSelectTaskSQL = `select name,status,createTimeStamp,expireTimeStamp,desc from task`
+    kDeleteTaskSQL = `delete from task where name="%s"`
 )
 
 func createTaskTable(dbname string) {
@@ -53,6 +54,10 @@ func NewTaskDbBySQLite() *TaskDbBySQLite {
     return &TaskDbBySQLite{dbname:dbfile}
 }
 
+func (t *TaskDbBySQLite)Delete(name string) error  {
+    err,_ := execSQL(t.dbname,fmt.Sprintf(kDeleteTaskSQL,name))
+    return err
+}
 func (t *TaskDbBySQLite)Put(task *pb.TaskDescription) error {
     db, err := sql.Open(kDriverName, t.dbname)
     if err != nil {
@@ -69,10 +74,13 @@ func (t *TaskDbBySQLite)Put(task *pb.TaskDescription) error {
     LOG.VLog(4).DebugTag("SQLRECORD", sqlsmt)
     return nil
 }
-func (t *TaskDbBySQLite) Update(task string,status string, des *pb.JobDescription) error {
+func (t *TaskDbBySQLite) Update(task string,expire int64,status string, des *pb.JobDescription) error {
     sets := make([]string,0)
     if status != "" {
         sets = append(sets,fmt.Sprintf(`status="%s"`,status))
+    }
+    if expire > 0 {
+        sets = append(sets,fmt.Sprintf(`expireTimeStamp=%d`,expire))
     }
     if des != nil {
         sets = append(sets,fmt.Sprintf(`des="%s"`,des.ToString()))

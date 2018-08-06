@@ -32,6 +32,8 @@ type CrawlerType struct {
 	DispatchFlushInterval    *int
 	RpcConnectionTimeOut *int
 	HttpPort                 *int
+    HttpsPort                            *int
+
 	ConfigFileReloadInterval *int
 	// scheduler
 	UrlScheduleFile  *string
@@ -52,6 +54,17 @@ type CrawlerType struct {
 	// task
 	CrawlTaskName *string
     TaskDbSQLiteFile *string
+
+
+    // api
+    TrackingLogFile *string
+    EnableWebService *bool
+    WebServiceRootPath *string
+    APIListenAddr                        *string
+    APIHTTPSListenAddr                   *string
+
+    // app
+    EnableCPUPProf *bool
 }
 
 var CrawlerConf = CrawlerType{
@@ -80,7 +93,8 @@ var CrawlerConf = CrawlerType{
 	DispatchFlushInterval:    flag.Int("dispatch_flush_interval", 10, "dispatch flush interval"),
     RpcConnectionTimeOut:    flag.Int("rpc_conn_timeout", 3, "rpc connection timeout"),
 	HttpPort:                 flag.Int("http_port", 9050, "http port"),
-	DefaultHostLoad:          flag.Int("default_hostload", 5, "default host load"),
+    HttpsPort:flag.Int("https_port", 0, "http babysitter port"),
+    DefaultHostLoad:          flag.Int("default_hostload", 5, "default host load"),
 	ConfigFileReloadInterval: flag.Int("config_file_reload_interval", 1800, "config file reload interval"),
 	UrlScheduleFile:          flag.String("schedule_file", "", "each line is a url"),
 	DefaultSendSpeed:         flag.Int("default_send_speed", 5, "default send speed for crawldocsender"),
@@ -94,4 +108,11 @@ var CrawlerConf = CrawlerType{
     TaskDbSQLiteFile :flag.String("taskdb_sqlite","db/task.db","task db sqlite file"),
     SchedulerFreshIntervalInSec:flag.Int("schedule_fresh_interval_insec",30,"task scheduler handler scan fresh interval in second"),
 
+    TrackingLogFile:flag.String("tracking_log","",""),
+    EnableWebService:flag.Bool("enable_webservice",false,"enable web service"),
+    WebServiceRootPath:flag.String("webservice_root", "webapp", "web service root path"),
+    APIListenAddr:flag.String("api_listen", ":9119", "api listen addr, 127.0.0.1:9797 or :9797"),
+    APIHTTPSListenAddr:flag.String("apis_listen", ":9118", "https api listen addr, 127.0.0.1:9797 or :9797"),
+
+    EnableCPUPProf:flag.Bool("enable_pprof", false, "enable pprof or not"),
 }
