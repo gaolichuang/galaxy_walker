@@ -32,7 +32,16 @@ func (l *LinearTask)RegisterRequestTypeCallBack(current,next pb.RequestType,fn T
     if _,ok:=l.rtypeCallBack[current];!ok {
         l.rtypeCallBack[current] = make([]taskChain,0)
     }
-    l.rtypeCallBack[current]=append(l.rtypeCallBack[current],taskChain{current,next,fn,runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()})
+    exist := false
+    for _,n := range l.rtypeCallBack[current] {
+        if n.current == current && n.next==next {
+            exist = true
+        }
+    }
+    if !exist {
+        l.rtypeCallBack[current] = append(l.rtypeCallBack[current],
+            taskChain{current, next, fn, runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()})
+    }
 }
 func (l *LinearTask)CheckIsLinearTopology() error {
     /*
@@ -46,21 +55,23 @@ func (l *LinearTask)CheckIsLinearTopology() error {
     }
     visit := make(map[pb.RequestType]bool)
     queue := make([]pb.RequestType,0)
-    visit[pb.RequestType_WEB_StartUp]=true
     queue = append(queue,pb.RequestType_WEB_StartUp)
     for len(queue) > 0 {
         top := queue[0]
+        if _,ok := visit[top];ok {
+            LOG.VLog(1).DebugTag("XXXXX","%v,%v,%s,%v",visit,queue,top,l.rtypeCallBack)
+            return fmt.Errorf("Exist Circle %s",pb.RequestTypeToString(top))
+        }
+        visit[top]=true
         for _,n := range l.rtypeCallBack[top] {
             queue = append(queue,n.next)
-            if _,ok := visit[n.next];ok {
-                return fmt.Errorf("Exist Circle %s",pb.RequestTypeToString(n.next))
-            }
-            visit[n.next]=true
         }
-        queue = queue[:len(queue)-1]
+        queue = queue[1:] //  pop queue.
     }
-    if len(visit)!=len(l.rtypeCallBack) {
-        return fmt.Errorf("not one island")
+    for k,_ := range l.rtypeCallBack {
+        if visit[k] == false {
+            return fmt.Errorf("not one island")
+        }
     }
     return nil
 }

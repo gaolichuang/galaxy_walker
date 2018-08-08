@@ -4,6 +4,7 @@ import (
     pb "galaxy_walker/src/proto"
     "galaxy_walker/src/crawl/scheduler"
     LOG "galaxy_walker/internal/gcodebase/log"
+    "github.com/davecgh/go-spew/spew"
 )
 
 type LinearDummyTask struct {
@@ -37,6 +38,7 @@ func (d *LinearDummyTask)webmainCallBack(rtype pb.RequestType, doc *pb.CrawlDoc)
     return urls
 }
 func (d *LinearDummyTask)webcontentCallBack(rtype pb.RequestType, doc *pb.CrawlDoc) []string {
+    spew.Dump(doc)
     LOG.VLog(2).DebugTag("XXXXXX","RequestType_WEB_CONTENT %s",pb.FromProtoToString(doc))
     return nil
 }

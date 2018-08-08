@@ -143,6 +143,11 @@ func saveIntoMergeDb(task string, docs []*pb.CrawlDoc) (error, int) {
 			tm = time_util.GetCurrentTimeStamp()
 		}
 		key := mergedDbKey(task, doc.Docid, tm)
+        // record db key
+        if doc.CrawlRecord == nil {
+            doc.CrawlRecord = &pb.CrawlRecord{}
+        }
+        doc.CrawlRecord.DbKey = key
 		value, e := proto.Marshal(doc)
 		if e != nil {
 			LOG.VLog(2).DebugTag("LevelDb", "saveIntoMergeDb %s proto marshal err %v", string(key), e)

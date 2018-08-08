@@ -115,6 +115,8 @@ message CrawlRecord {
     // time the doc fetched
     int64 fetch_time = 3;
     int64 fetch_use_inms = 4;
+
+    string db_key = 10;
 }
 
 message CrawlParam {

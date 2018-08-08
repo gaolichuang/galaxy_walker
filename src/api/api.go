@@ -11,6 +11,7 @@ import (
     "encoding/json"
     "strings"
     "log"
+    "html"
     "galaxy_walker/internal/gcodebase/babysitter"
     LOG "galaxy_walker/internal/gcodebase/log"
     "galaxy_walker/internal/gcodebase"
@@ -20,6 +21,7 @@ import (
     "galaxy_walker/internal/github.com/gorilla/mux"
     "galaxy_walker/internal/github.com/asaskevich/govalidator"
     "galaxy_walker/src/db"
+    "github.com/davecgh/go-spew/spew"
 )
 var CONF = conf.Conf
 
@@ -41,6 +43,9 @@ const (
     kEndPointETCFileServerPath = kEndPointPreFix + "/etc/"
 
     kEndPointTrackingLog = kEndPointPreFix + "/tracking"
+
+
+    kEndPointSpew = kEndPointPreFix + "/spew"
 )
 var TrackingLog LOG.CustomLogger
 func init() {
@@ -166,6 +171,8 @@ func (s *APIService) Serve(host string, port int, shost string, sport int) {
     router.Handle(kEndPointTrackingLog, babysitter.CommonSingleFileServer(
         *CONF.Crawler.TrackingLogFile)).Methods("GET")
 
+    router.HandleFunc(kEndPointSpew, s.SampleSpew).Methods("GET")
+
     s.serveDBContent(router)
     s.serveTaskAPI(router)
 
@@ -278,6 +285,12 @@ func (s *APIService) RequestProxy(c *APIContext, w http.ResponseWriter, r *http.
     return []byte(respErr.Error())
 }
 
+func (s *APIService) SampleSpew(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Content-Type", "text/html")
+    fmt.Fprintf(w, "Hi there, %s!", r.URL.Path[1:])
+    fmt.Fprintf(w, "<!--\n" + html.EscapeString(spew.Sdump(r)) + "\n-->")
+
+}
 func (s *APIService) SampleHandler(w http.ResponseWriter, r *http.Request) {
     /*
        GET   /dnsapi/sample/{name}
