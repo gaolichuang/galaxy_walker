@@ -32,15 +32,17 @@ func (l *LinearTask)RegisterRequestTypeCallBack(current,next pb.RequestType,fn T
     if _,ok:=l.rtypeCallBack[current];!ok {
         l.rtypeCallBack[current] = make([]taskChain,0)
     }
+    fnName := runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()
     exist := false
     for _,n := range l.rtypeCallBack[current] {
-        if n.current == current && n.next==next {
+        // 支持current next相同但不同fn的方法append
+        if n.current == current && n.next==next && n.fnName == fnName {
             exist = true
         }
     }
     if !exist {
         l.rtypeCallBack[current] = append(l.rtypeCallBack[current],
-            taskChain{current, next, fn, runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()})
+            taskChain{current, next, fn, fnName})
     }
 }
 func (l *LinearTask)CheckIsLinearTopology() error {
@@ -63,8 +65,12 @@ func (l *LinearTask)CheckIsLinearTopology() error {
             return fmt.Errorf("Exist Circle %s",pb.RequestTypeToString(top))
         }
         visit[top]=true
+        oneLoop := make(map[pb.RequestType]bool)
         for _,n := range l.rtypeCallBack[top] {
-            queue = append(queue,n.next)
+            // 单个slice里面支持重复的next. 去重复加入
+            if _,ok := oneLoop[n.next];!ok {
+                queue = append(queue,n.next)
+            }
         }
         queue = queue[1:] //  pop queue.
     }

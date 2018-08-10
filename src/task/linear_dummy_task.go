@@ -12,7 +12,9 @@ type LinearDummyTask struct {
 }
 func (d *LinearDummyTask)Init() error {
     d.RegisterRequestTypeCallBack(pb.RequestType_WEB_StartUp,pb.RequestType_WEB_MAIN,d.startUpCallBack)
+    // support same RequestType.
     d.RegisterRequestTypeCallBack(pb.RequestType_WEB_MAIN,pb.RequestType_WEB_CONTENT,d.webmainCallBack)
+    d.RegisterRequestTypeCallBack(pb.RequestType_WEB_MAIN,pb.RequestType_WEB_CONTENT,d.webmain2CallBack)
     d.RegisterRequestTypeCallBack(pb.RequestType_WEB_CONTENT,pb.RequestType_WEB_End,d.webcontentCallBack)
     return d.CheckIsLinearTopology()
 }
@@ -24,6 +26,10 @@ func (d *LinearDummyTask)startUpCallBack(rtype pb.RequestType, doc *pb.CrawlDoc)
     return  []string{
         "http://roll.sohu.com/sports/",
     }
+}
+func (d *LinearDummyTask)webmain2CallBack(rtype pb.RequestType, doc *pb.CrawlDoc) []string {
+    LOG.VLog(2).DebugTag("XXXXXX","RequestType_WEB_MAIN %s",pb.FromProtoToString(doc))
+    return nil
 }
 func (d *LinearDummyTask)webmainCallBack(rtype pb.RequestType, doc *pb.CrawlDoc) []string {
     LOG.VLog(2).DebugTag("XXXXXX","RequestType_WEB_MAIN %s",pb.FromProtoToString(doc))
